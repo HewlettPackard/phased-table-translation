@@ -3,8 +3,16 @@
  */
 package com.hpe.amce.mapping
 
+/**
+ * To be deleted.
+ */
 class Library {
+    /**
+     * To be deleted.
+     * @return To be deleted.
+     */
     boolean someLibraryMethod() {
+        [].fla
         true
     }
 }
