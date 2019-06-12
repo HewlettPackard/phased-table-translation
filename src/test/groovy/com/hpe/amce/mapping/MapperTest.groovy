@@ -20,7 +20,7 @@ class MapperTest extends Specification {
 
     @Shared
     private ListAppender listAppender = LoggerContext.getContext(false).
-            getLogger(MapperTest.package.name).appenders.get("LIST") as ListAppender
+            getRootLogger().appenders.get("LIST") as ListAppender
 
     void setup() {
         listAppender.clear()
@@ -274,8 +274,10 @@ class MapperTest extends Specification {
     }
 
     Log getActualLogResult() {
-        listAppender.events.any { it.loggerName.startsWith(getClass().package.name) && it.level == Level.WARN } ?
-                Log.Warn : Log.None
+        listAppender.events.any {
+            it.loggerName.startsWith(getClass().package.name) &&
+                    it.level == Level.WARN
+        } ? Log.Warn : Log.None
     }
 
     @Unroll
