@@ -10,7 +10,7 @@ import javax.annotation.Nullable
 
 /**
  * Simple object mapper that applies fields mappers
- * one-by-one in the same thread.
+ * one-by-one in the same thread in the specified order.
  *
  * Mandatory fields are mapped using {@link SimpleObjectMapper#mandatoryFieldMapper}
  * while optional fields are mapped using {@link SimpleObjectMapper#optionalFieldMapper}.
@@ -23,15 +23,19 @@ class SimpleObjectMapper<OO, RO, P> implements ObjectMapper<OO, RO, P> {
 
     /**
      * Mapper for optional fields.
+     *
+     * By default, this is {@link OptionalFieldMapper}.
      */
     @Nonnull
-    FieldMapper<OO, RO, P> optionalFieldMapper
+    FieldMapper<OO, RO, P> optionalFieldMapper = new OptionalFieldMapper<>()
 
     /**
      * Mapper for mandatory fields.
+     *
+     * By default, this is {@link MandatoryFieldMapper}.
      */
     @Nonnull
-    FieldMapper<OO, RO, P> mandatoryFieldMapper
+    FieldMapper<OO, RO, P> mandatoryFieldMapper = new MandatoryFieldMapper<>()
 
     @Override
     void mapAllFields(

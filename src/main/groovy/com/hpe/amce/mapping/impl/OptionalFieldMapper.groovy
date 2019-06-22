@@ -9,6 +9,22 @@ import javax.annotation.Nonnull
 /**
  * State machine based mapper for optional fields.
  *
+ * Optional means that corresponding field in the resulting object is optional and is not required to be set.
+ * Optional field could be used in pure validation mode when there is no field to set in
+ * resulting object to generate a warning if check on input value fails.
+ *
+ * A warning will be generated if optional field
+ * has an invalid value (as per validator) or can't be translated.
+ * No exception will be raised and nothing will be injected into resulting object
+ * unless default value is specified.
+ *
+ * If there is default value then it will be used if input field is missing,
+ * invalid or causes translation error.
+ *
+ * Absence of optional field in input is not considered as an error and does not generate a warning.
+ *
+ * Absence means null.
+ *
  * OO - Original object type.
  * RO - Resulting object type.
  * P - Type of parameters object.

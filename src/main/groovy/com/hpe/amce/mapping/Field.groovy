@@ -12,7 +12,7 @@ import javax.annotation.Nullable
  * Intended to be constructed using fluid API and method chaining.
  * Example:
  * <code><pre>
- *     new Field&lt;Map,Event,String,Long&gt;().
+ *     new Field&lt;Map&lt;String,?&gt;,Event,String,Long&gt;().
  *         withId('notificationIdentifier').
  *         withGetter {it.identifier}.
  *         withTranslator {Long.parseLong(it)}.

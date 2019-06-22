@@ -14,8 +14,15 @@ import javax.annotation.Nonnull
  *
  * Child classes should define their state machine using {@link AbstractStateMachineFieldMapper#getStateMachine()}.
  *
- * This base class will check for incorrect configuration combinations like
- * like both setter and defaulter being absent at the same time.
+ * This base class will check for incorrect configuration combinations:
+ * <ul>
+ * <li>Neither getter not defaulter are set - no way to obtain value to validate/translate/set.</li>
+ * <li>If setter is not set this means we are in pure checking mode.
+ *      This is pointless if validator is not set.
+ *      Also defaulter and translation are useless in this case and should not be set.</li>
+ * <li>If there is no getter then it's pointless to set
+ *      validator or translator because they won't be called anyway.</li>
+ * </ul>
  *
  * OO - Original object type.
  * RO - Resulting object type.
@@ -29,16 +36,17 @@ abstract class AbstractStateMachineFieldMapper<OO, RO, P> implements FieldMapper
             @Nonnull Field<OO, RO, ?, ?, P> field,
             @Nonnull MappingContext<OO, RO, P> mappingContext) {
         if (!field.getter && !field.defaulter) {
-            throw new IllegalStateException('Neither getter, nor defaulter are set. What will I translate?')
+            throw new IllegalStateException('Neither getter not defaulter are set' +
+                    ' - no way to obtain value to validate/translate/set.')
         }
         if (!field.setter && (!field.validator || field.defaulter || field.translator)) {
-            throw new IllegalStateException('If setter is not set then we are in pure checking mode. ' +
+            throw new IllegalStateException('If setter is not set this means we are in pure checking mode. ' +
                     'This is pointless if validator is not set. ' +
-                    'Also defaulter and translation are useless in this case.')
+                    'Also defaulter and translation are useless in this case and should not be set.')
         }
         if (!field.getter && (field.validator || field.translator)) {
-            throw new IllegalStateException("If we have no getter then it's pointless to set validator or translator " +
-                    "because they won't be called anyway.")
+            throw new IllegalStateException("If there is no getter then it's pointless to set " +
+                    "validator or translator because they won't be called anyway.")
         }
         if (mappingContext == null) {
             throw new IllegalStateException('Translation context must be set')

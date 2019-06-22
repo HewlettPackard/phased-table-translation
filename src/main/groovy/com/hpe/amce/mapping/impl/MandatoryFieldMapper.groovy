@@ -9,6 +9,20 @@ import javax.annotation.Nonnull
 /**
  * State machine based mapper for mandatory fields.
  *
+ * Mandatory means that corresponding field in the resulting object must be set.
+ * However, in pure validation mode when there is no field to set in
+ * resulting object, mandatory means that input value must be present and must be valid.
+ *
+ * It is considered to be data error if mandatory field is absent in input
+ * or has an invalid value (as per validator) or can't be translated.
+ * Data error means that an exception will be raised.
+ *
+ * If there is default value then it will be used if input field is missing,
+ * invalid or causes translation error. However, warning message will still
+ * be generated.
+ *
+ * Absence means null.
+ *
  * OO - Original object type.
  * RO - Resulting object type.
  * P - Type of parameters object.

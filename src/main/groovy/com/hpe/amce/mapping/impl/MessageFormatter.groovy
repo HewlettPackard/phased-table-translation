@@ -3,6 +3,8 @@ package com.hpe.amce.mapping.impl
 import com.hpe.amce.mapping.Field
 import com.hpe.amce.mapping.MappingContext
 
+import javax.annotation.Nonnull
+
 /**
  * Formats messages related to mapping.
  */
@@ -16,6 +18,10 @@ interface MessageFormatter {
      * @param message Explanation of what went wrong or what we were doing.
      * @return Detailed message.
      */
-    String formatMessage(MappingContext<?, ?, ?> mappingContext, Field<?, ?, ?, ?, ?> field, String message)
+    @Nonnull
+    String formatMessage(
+            @Nonnull MappingContext<?, ?, ?> mappingContext,
+            @Nonnull Field<?, ?, ?, ?, ?> field,
+            @Nonnull String message)
 
 }

@@ -3,8 +3,19 @@ package com.hpe.amce.mapping.impl
 import com.hpe.amce.mapping.Field
 import com.hpe.amce.mapping.MappingContext
 
+import javax.annotation.Nonnull
+
 /**
  * Message formatter that puts all information on single line.
+ *
+ * Information that is added:
+ * <ul>
+ *     <li>type of field: optional/mandatory</li>
+ *     <li>input object</li>
+ *     <li>mapping parameters</li>
+ *     <li>field identifier</li>
+ *     <li>provided message</li>
+ * </ul>
  */
 class SingleLineMesasgeFormatter implements MessageFormatter {
 
@@ -14,7 +25,11 @@ class SingleLineMesasgeFormatter implements MessageFormatter {
     boolean mandatory
 
     @Override
-    String formatMessage(MappingContext<?, ?, ?> mappingContext, Field<?, ?, ?, ?, ?> field, String message) {
+    @Nonnull
+    String formatMessage(
+            @Nonnull MappingContext<?, ?, ?> mappingContext,
+            @Nonnull Field<?, ?, ?, ?, ?> field,
+            @Nonnull String message) {
         String optionality = mandatory ? 'mandatory' : 'optional'
         "$message for $optionality field ${field.id}." +
                 " Parameters: ${mappingContext.parameters}." +
