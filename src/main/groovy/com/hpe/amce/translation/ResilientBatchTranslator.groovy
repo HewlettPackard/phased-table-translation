@@ -1,6 +1,7 @@
 package com.hpe.amce.translation
 
 import com.codahale.metrics.MetricRegistry
+import com.codahale.metrics.Timer
 import groovy.util.logging.Log4j2
 import org.apache.logging.log4j.Level
 import org.apache.logging.log4j.LogManager
@@ -74,18 +75,18 @@ class ResilientBatchTranslator<C> {
     @Nonnull
     Closure dumpBatchToBuffer = { List<?> events, StringBuilder buffer ->
         if (events == null) {
-            buffer << "null"
+            buffer << 'null'
             return
         }
-        buffer << "["
+        buffer << '['
         events.eachWithIndex { Object event, int index ->
-            buffer << System.lineSeparator() << "|- " << index << " "
+            buffer << System.lineSeparator() << '|- ' << index << ' '
             dumpEventToBuffer(event, buffer)
         }
         if (!events.empty) {
-            buffer << "|- end of batch"
+            buffer << '|- end of batch'
         }
-        buffer << "]"
+        buffer << ']'
     }
 
     /**
@@ -126,7 +127,7 @@ class ResilientBatchTranslator<C> {
             if (buffer.length() > 0) {
                 buffer.delete(0, buffer.length())
             }
-            buffer << "After " << stageName << " with context " << context << ": "
+            buffer << 'After ' << stageName << ' with context ' << context << ': '
             dumpBatchToBuffer(events, buffer)
             logger.log(traceLevel, buffer.toString())
         }
@@ -280,7 +281,7 @@ class ResilientBatchTranslator<C> {
         @Override
         List<?> call() throws Exception {
             StringBuilder buffer = new StringBuilder(estimatedDumpedEventSide * (1 + events.size()))
-            traceStage(buffer, loggerIn, "input", events, context)
+            traceStage(buffer, loggerIn, 'input', events, context)
             processingStages.each { String stageName, Closure<List<?>> stageCode ->
                 Timer eventTimer = metricRegistry.timer("${name}.one.${stageName}")
                 events = events.collectMany { Object event ->
@@ -354,6 +355,8 @@ class ResilientBatchTranslator<C> {
      * @return Result of applying stageCode to event and context.
      */
     @Nonnull
+    // Want to catch Groovy assertion violations
+    @SuppressWarnings('CatchThrowable')
     List<?> processEventSafely(@Nullable Object event,
                                @Nullable Object context,
                                @Nonnull String stageName,
