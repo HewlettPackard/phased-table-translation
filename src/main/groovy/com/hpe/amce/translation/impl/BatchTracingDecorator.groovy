@@ -95,13 +95,31 @@ class BatchTracingDecorator<O, R, C> implements BatchTranslator<O, R, C> {
 
     @Override
     List<R> translateBatch(@Nullable List<O> elements, @Nullable C context) {
+        traceIn(elements, context)
+        List<R> result = next.translateBatch(elements, context)
+        traceOut(result, context)
+        result
+    }
+
+    /**
+     * Traces input elements.
+     * @param elements Input elements.
+     * @param context Translation context.
+     */
+    protected void traceIn(@Nullable List<O> elements, @Nullable C context) {
         if (inLogger.isEnabled(inLevel)) {
             inLogger.log(inLevel, inDumper.dumpBatch(elements, context))
         }
-        List<R> result = next.translateBatch(elements, context)
+    }
+
+    /**
+     * Traces output elements.
+     * @param elements Output elements.
+     * @param context Translation context.
+     */
+    protected void traceOut(@Nullable List<R> elements, @Nullable C context) {
         if (outLogger.isEnabled(outLevel)) {
-            outLogger.log(outLevel, outDumper.dumpBatch(result, context))
+            outLogger.log(outLevel, outDumper.dumpBatch(elements, context))
         }
-        result
     }
 }

@@ -99,15 +99,37 @@ class StageTracingDecorator<C> implements AroundStage<C> {
     @Override
     List<?> applyStage(@Nonnull String stageName, @Nonnull Closure<List<?>> stageCode,
                        @Nonnull List<?> elements, @Nullable C context) {
+        traceIn(stageName, elements, context)
+        List<?> result = next.applyStage(stageName, stageCode, elements, context)
+        traceOut(stageName, result, context)
+        result
+    }
+
+    /**
+     * Traces input elements.
+     * @param stageName Name of stage being traced.
+     * @param elements Stage input elements.
+     * @param context Translation context.
+     */
+    protected void traceIn(@Nonnull String stageName,
+                           @Nonnull List<?> elements, @Nullable C context) {
         Logger inLogger = findLoggerForStageAndMode(stageName, true)
         if (inLogger.isEnabled(inLevel)) {
             inLogger.log(inLevel, dumper.dumpBeforeStage(stageName, elements, context))
         }
-        List<?> result = next.applyStage(stageName, stageCode, elements, context)
+    }
+
+    /**
+     * Traces output elements.
+     * @param stageName Name of stage being traced.
+     * @param elements Stage output elements.
+     * @param context Translation context.
+     */
+    protected void traceOut(@Nonnull String stageName,
+                            @Nonnull List<?> elements, @Nullable C context) {
         Logger outLogger = findLoggerForStageAndMode(stageName, false)
         if (outLogger.isEnabled(outLevel)) {
             outLogger.log(outLevel, dumper.dumpAfterStage(stageName, elements, context))
         }
-        result
     }
 }
