@@ -15,7 +15,7 @@ interface AroundElement<C> {
      * @param stageCode Code of translation stage to be applied.
      * @param element Element to be translated. Can be null if null was passed.
      * @param context Translation context or null if not specified.
-     * @return Result of translating elements using specified stage.
+     * @return Result of translating specified element using specified stage.
      * See {@link DecorableStagedBatchTranslator#processingStages}.
      */
     @Nonnull
