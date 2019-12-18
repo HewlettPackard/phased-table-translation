@@ -4,6 +4,7 @@ import com.codahale.metrics.MetricRegistry
 import org.apache.logging.log4j.Level
 import spock.lang.Specification
 
+// TODO: verify tracing?
 class ResilientBatchTranslatorTest extends Specification {
 
     class RawEvent {
@@ -235,11 +236,6 @@ class ResilientBatchTranslatorTest extends Specification {
             instance.translateBatch((1..batchSize).collect { new RawEvent(num: it) }, new Context(param: "ems"))
         }
         then:
-        println 'counters:' + instance.metricRegistry.counters*.key
-        println 'gauges:' + instance.metricRegistry.gauges*.key
-        println 'histograms:' + instance.metricRegistry.histograms*.key
-        println 'meters:' + instance.metricRegistry.meters*.key
-        println 'timers:' + instance.metricRegistry.timers*.key
         instance.metricRegistry.histogram(getClass().name + ".in.batch_size").snapshot.max == batchSize
         instance.metricRegistry.histogram(getClass().name + ".out.batch_size").snapshot.max == expectedOutBatchSize
         instance.metricRegistry.meter(getClass().name + ".batches").count == batchCount
