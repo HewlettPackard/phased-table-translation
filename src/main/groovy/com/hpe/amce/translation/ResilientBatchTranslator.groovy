@@ -27,7 +27,10 @@ import java.util.concurrent.Callable
  * Any null elements and lists are ignored.
  *
  * C - Type of context object.
+ *
+ * @deprecated Use{@link com.hpe.amce.translation.impl.DecorableStagedBatchTranslator} instead.
  */
+@Deprecated
 @Log4j2
 class ResilientBatchTranslator<C> {
 
