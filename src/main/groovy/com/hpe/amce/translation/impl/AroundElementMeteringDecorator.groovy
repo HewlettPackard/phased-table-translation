@@ -50,6 +50,19 @@ class AroundElementMeteringDecorator<C> implements AroundElement<C> {
     @Nonnull
     Closure<String> timerName = { String stageName -> "$metricsBaseName${stageName}.one" }
 
+    /**
+     * Creates new instance.
+     * @param next Translator to decorate.
+     * @param metricRegistry Registry where to report metrics.
+     * @param metricsBaseName Prefix for metric names.
+     */
+    AroundElementMeteringDecorator(@Nonnull AroundElement<C> next, @Nonnull MetricRegistry metricRegistry,
+                                   @Nonnull String metricsBaseName) {
+        this.next = next
+        this.metricRegistry = metricRegistry
+        this.metricsBaseName = metricsBaseName
+    }
+
     @Override
     List<?> translateElement(@Nonnull String stageName, @Nonnull Closure<List<?>> stageCode, @Nullable Object element,
                              @Nullable C context) {

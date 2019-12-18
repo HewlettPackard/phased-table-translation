@@ -71,6 +71,19 @@ class StageMeteringDecorator<C> implements AroundStage<C> {
     @Nonnull
     Closure<String> stageTimerMetricName = { String stageName -> "$metricsBaseName${stageName}.batch" }
 
+    /**
+     * Creates new instance.
+     * @param next Translator to decorate.
+     * @param metricRegistry Registry where to report metrics.
+     * @param metricsBaseName Prefix for metric names.
+     */
+    StageMeteringDecorator(@Nonnull AroundStage<C> next, @Nonnull MetricRegistry metricRegistry,
+                           @Nonnull String metricsBaseName) {
+        this.next = next
+        this.metricRegistry = metricRegistry
+        this.metricsBaseName = metricsBaseName
+    }
+
     @Override
     List<?> applyStage(@Nonnull String stageName, @Nonnull Closure<List<?>> stageCode,
                        @Nonnull List<?> elements, @Nullable C context) {
