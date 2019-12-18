@@ -89,7 +89,7 @@ class DecorableStagedBatchTranslator<O, R, C> implements BatchTranslator<O, R, C
         List<?> applyStage(@Nonnull String stageName,
                            @Nonnull Closure<List<?>> stageCode, @Nonnull List<?> elements, @Nullable C context) {
             elements.collectMany { element ->
-                aroundElement.translateElement(stageName, stageCode, element, context)
+                aroundElement.translateElement(stageName, stageCode, element, context) ?: Collections.emptyList()
             }
         }
     }
