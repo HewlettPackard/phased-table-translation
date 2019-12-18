@@ -5,6 +5,7 @@ import groovy.util.logging.Log4j2
 
 import javax.annotation.Nonnull
 import javax.annotation.Nullable
+import java.util.concurrent.Callable
 
 /**
  * Decorates another {@link AroundStage}
@@ -48,31 +49,34 @@ class StageMeteringDecorator<C> implements AroundStage<C> {
     String metricsBaseName
 
     /**
-     * Name of the metric that will report how many batches have been received.
+     * Name of the metric that will report batch size delta for a stage.
      *
-     * The closure should take no parameters and should return metric name.
+     * Zero means that stage did not change number of elements. Positive value means that
+     * stage has added elements. Negative value means that stage has removed elements.
      *
-     * By default, this is {@link #metricsBaseName}.batches.count.
+     * The closure should take stage name as parameter and should return metric name.
+     *
+     * By default, this is {@link #metricsBaseName}STAGENAME.delta.
      */
     @Nonnull
     Closure<String> deltaBatchSizeMetricName = { String stageName -> "$metricsBaseName${stageName}.delta" }
 
     /**
-     * Name of the metric that will report how many batches have been received.
+     * Name of the metric that will report time it took to process a batch on a stage.
      *
-     * The closure should take no parameters and should return metric name.
+     * The closure should take stage name as parameter and should return metric name.
      *
-     * By default, this is {@link #metricsBaseName}.batches.count.
+     * By default, this is {@link #metricsBaseName}STAGENAME.batch.
      */
     @Nonnull
-    Closure<String> stageTimerMetricName = { String stageName -> "$metricsBaseName${stageName}" }
+    Closure<String> stageTimerMetricName = { String stageName -> "$metricsBaseName${stageName}.batch" }
 
     @Override
     List<?> applyStage(@Nonnull String stageName, @Nonnull Closure<List<?>> stageCode,
                        @Nonnull List<?> elements, @Nullable C context) {
-        List<?> result = metricRegistry.timer(stageTimerMetricName(stageName)).time {
+        List<?> result = metricRegistry.timer(stageTimerMetricName(stageName)).time({
             next.applyStage(stageName, stageCode, elements, context)
-        }
+        } as Callable)
         metricRegistry.histogram(deltaBatchSizeMetricName(stageName)).update(
                 (result?.size() ?: 0) - (elements?.size() ?: 0))
         result
