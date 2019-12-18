@@ -108,16 +108,15 @@ class ResilientBatchTranslatorTest extends Specification {
         ]
         instance.lookupLoggers()
         when:
-        List translated = instance.translateBatch([
+        List<TranslatedEvent> translated = instance.translateBatch([
                 new RawEvent(num: 1),
                 new RawEvent(num: 2),
                 new RawEvent(num: 3),
                 new RawEvent(num: 4),
-        ], "ems")
+        ], new Context(param: "ems"))*.asType(TranslatedEvent)
         then:
         assert translated
         assert translated.size() == 1
-        assert translated[0] && translated[0] instanceof TranslatedEvent
         assert translated[0].num == 4
     }
 
@@ -139,7 +138,7 @@ class ResilientBatchTranslatorTest extends Specification {
         ]
         instance.lookupLoggers()
         when:
-        List translated = instance.translateBatch([new RawEvent(), null], "ems")
+        List translated = instance.translateBatch([new RawEvent(), null], new Context(param: "ems"))
         then:
         assert translated != null
         assert translated.empty
@@ -169,12 +168,12 @@ class ResilientBatchTranslatorTest extends Specification {
         ]
         instance.lookupLoggers()
         when:
-        List translated = instance.translateBatch([
+        List<TranslatedEvent> translated = instance.translateBatch([
                 new RawEvent(num: 1),
                 new RawEvent(num: 2),
                 new RawEvent(num: 3),
                 new RawEvent(num: 4),
-        ], "ems")
+        ], new Context(param: "ems"))*.asType(TranslatedEvent)
         then:
         assert translated
         assert translated.size() == 1
@@ -206,11 +205,11 @@ class ResilientBatchTranslatorTest extends Specification {
         ]
         instance.lookupLoggers()
         when:
-        List translated = instance.translateBatch([
+        List<TranslatedEvent> translated = instance.translateBatch([
                 new RawEvent(num: 1),
                 new RawEvent(num: 3),
                 new RawEvent(num: 5),
-        ])
+        ])*.asType(TranslatedEvent)
         then:
         assert translated
         (0..5).each {
@@ -233,7 +232,7 @@ class ResilientBatchTranslatorTest extends Specification {
                 new RawEvent(num: 2),
                 new RawEvent(num: 3),
                 new RawEvent(num: 4),
-        ], "ems")
+        ], new Context(param: "ems"))
         then:
         histogram.count == 1
         histogram.snapshot.min == 4
@@ -265,12 +264,12 @@ class ResilientBatchTranslatorTest extends Specification {
         ]
         instance.lookupLoggers()
         when:
-        List translated = instance.translateBatch([
+        List<TranslatedEvent> translated = instance.translateBatch([
                 new RawEvent(num: 1),
                 new RawEvent(num: 2),
                 new RawEvent(num: 3),
                 new RawEvent(num: 4),
-        ], "ems")
+        ], new Context(param: "ems"))*.asType(TranslatedEvent)
         then:
         assert translated
         assert translated.size() == 1
