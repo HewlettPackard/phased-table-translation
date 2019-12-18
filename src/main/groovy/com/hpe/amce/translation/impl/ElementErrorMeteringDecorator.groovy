@@ -12,17 +12,17 @@ import javax.annotation.Nullable
  * this decorator increments a meter.
  *
  * The name of meter to be incremented is determined by
- * {@link ErrorMeterer#getMetricName}.
+ * {@link ElementErrorMeteringDecorator#getMeterName}.
  *
  * C - type of translation context.
  */
-class ErrorMeterer<C> implements AroundElement<C> {
+class ElementErrorMeteringDecorator<C> implements AroundElement<C> {
 
     /**
      * Translator to be decorated.
      */
     @Nonnull
-    AroundElement<C> decorated
+    AroundElement<C> next
 
     /**
      * Metric registry to which metrics should be reported.
@@ -41,23 +41,23 @@ class ErrorMeterer<C> implements AroundElement<C> {
      *
      * The closure should take single String parameter that is stage name causing error and should return metric name.
      *
-     * By default, this is {@link #metricsBaseName}.error.stageName.
-     * Where stageName is a name of the stage that has caused an error.
+     * By default, this is {@link #metricsBaseName}STAGENAME.error.
+     * Where STAGENAME is a name of the stage that has caused an error.
      */
     @Nonnull
-    Closure<String> getMetricName = { "${metricsBaseName}.error.${it}" }
+    Closure<String> meterName = { "${metricsBaseName}${it}.error" }
 
     /**
      * Creates an instance.
-     * @param decorated Translator to be decorated.
+     * @param next Translator to be decorated.
      * @param metricRegistry Metric registry where metric should be reported to.
      * @param metricsBaseName Base name (prefix) for metrics.
      */
-    ErrorMeterer(
-            @Nonnull AroundElement<C> decorated,
+    ElementErrorMeteringDecorator(
+            @Nonnull AroundElement<C> next,
             @Nonnull MetricRegistry metricRegistry,
             @Nonnull String metricsBaseName) {
-        this.decorated = decorated
+        this.next = next
         this.metricRegistry = metricRegistry
         this.metricsBaseName = metricsBaseName
     }
@@ -68,9 +68,9 @@ class ErrorMeterer<C> implements AroundElement<C> {
     List<?> translateElement(@Nonnull String stageName, @Nonnull Closure<List<?>> stageCode,
                              @Nullable Object element, @Nullable C context) {
         try {
-            decorated.translateElement(stageName, stageCode, element, context)
+            next.translateElement(stageName, stageCode, element, context)
         } catch (Throwable e) {
-            metricRegistry.meter(getMetricName(stageName)).mark()
+            metricRegistry.meter(meterName(stageName)).mark()
             throw e
         }
     }

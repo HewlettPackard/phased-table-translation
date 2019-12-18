@@ -13,7 +13,7 @@ import javax.annotation.Nullable
  *
  * C - type of translation context.
  */
-class MeteredStageTracingDecorator<C> extends StageTracingDecorator<C> {
+class StageTracingMeteredDecorator<C> extends StageTracingDecorator<C> {
 
     @Nonnull
     private final Timer timer
@@ -25,7 +25,7 @@ class MeteredStageTracingDecorator<C> extends StageTracingDecorator<C> {
      * @param metricRegistry Registry where to report metric.
      * @param metricName Name of metric that will hold tracing time.
      */
-    MeteredStageTracingDecorator(AroundStage<C> next, StageDumper<C> dumper, MetricRegistry metricRegistry,
+    StageTracingMeteredDecorator(AroundStage<C> next, StageDumper<C> dumper, MetricRegistry metricRegistry,
                                  String metricName) {
         super(next, dumper)
         timer = metricRegistry.timer(metricName)

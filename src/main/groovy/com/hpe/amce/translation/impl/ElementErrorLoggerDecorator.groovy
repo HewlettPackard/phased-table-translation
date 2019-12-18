@@ -14,20 +14,20 @@ import javax.annotation.Nullable
  * C - type of translation context.
  */
 @Log4j2
-class ErrorLogger<C> implements AroundElement<C> {
+class ElementErrorLoggerDecorator<C> implements AroundElement<C> {
 
     /**
      * Translator to be decorated.
      */
     @Nonnull
-    AroundElement<C> decorated
+    AroundElement<C> next
 
     /**
      * Creates instance.
-     * @param decorated Translator to be decorated.
+     * @param next Translator to be decorated.
      */
-    ErrorLogger(@Nonnull AroundElement<C> decorated) {
-        this.decorated = decorated
+    ElementErrorLoggerDecorator(@Nonnull AroundElement<C> next) {
+        this.next = next
     }
 
     @Override
@@ -36,7 +36,7 @@ class ErrorLogger<C> implements AroundElement<C> {
     List<?> translateElement(@Nonnull String stageName, @Nonnull Closure<List<?>> stageCode,
                              @Nullable Object element, @Nullable C context) {
         try {
-            decorated.translateElement(stageName, stageCode, element, context)
+            next.translateElement(stageName, stageCode, element, context)
         } catch (Throwable e) {
             log.error("$stageName has failed." +
                     " Reason: ${e.message}." +

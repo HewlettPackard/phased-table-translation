@@ -107,13 +107,13 @@ class DecorableStagedBatchTranslator<O, R, C> implements BatchTranslator<O, R, C
     /**
      * Applies translation to each element.
      *
-     * By default, this is {@link ErrorSuppressor} that delegates to {@link StageCaller}.
+     * By default, this is {@link ElementErrorSuppressorDecorator} that delegates to {@link StageCaller}.
      * You can use custom decorators around {@link StageCaller} to add custom behaviour
      * like per-element tracing, per-element metrics reporting or reporting element translation errors
      * to log or metrics.
      */
     @Nonnull
-    AroundElement<C> aroundElement = new ErrorSuppressor<C>(new StageCaller<C>())
+    AroundElement<C> aroundElement = new ElementErrorSuppressorDecorator<C>(new StageCaller<C>())
 
     @Override
     List<R> translateBatch(@Nullable List<O> elements, @Nullable C context) {

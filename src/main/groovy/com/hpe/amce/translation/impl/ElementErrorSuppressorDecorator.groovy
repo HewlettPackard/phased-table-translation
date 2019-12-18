@@ -17,16 +17,17 @@ import javax.annotation.Nullable
  *
  * C - type of translation context.
  */
-class ErrorSuppressor<C> implements AroundElement<C> {
+class ElementErrorSuppressorDecorator<C> implements AroundElement<C> {
+
     @Nonnull
-    private final AroundElement<C> decorated
+    private final AroundElement<C> next
 
     /**
      * Creates instance.
-     * @param decorated Translator to be decorated.
+     * @param next Translator to be decorated.
      */
-    ErrorSuppressor(@Nonnull AroundElement<C> decorated) {
-        this.decorated = decorated
+    ElementErrorSuppressorDecorator(@Nonnull AroundElement<C> next) {
+        this.next = next
     }
 
     @Override
@@ -35,7 +36,7 @@ class ErrorSuppressor<C> implements AroundElement<C> {
     List<?> translateElement(@Nonnull String stageName, @Nonnull Closure<List<?>> stageCode,
                              @Nullable Object element, @Nullable C context) {
         try {
-            decorated.translateElement(stageName, stageCode, element, context)
+            next.translateElement(stageName, stageCode, element, context)
         } catch (Throwable e) {
             []
         }

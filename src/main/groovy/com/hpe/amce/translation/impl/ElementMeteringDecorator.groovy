@@ -11,16 +11,16 @@ import java.util.concurrent.Callable
  *
  * The time is reported per element per stage rather than per batch per stage.
  *
- * Metrics will be published in {@link AroundElementMeteringDecorator#metricRegistry} with
- * {@link AroundElementMeteringDecorator#metricsBaseName} being the prefix for the name of
+ * Metrics will be published in {@link ElementMeteringDecorator#metricRegistry} with
+ * {@link ElementMeteringDecorator#metricsBaseName} being the prefix for the name of
  * all metrics.
  *
  * It is possible to override default metric names via
- * {@link AroundElementMeteringDecorator#timerName}.
+ * {@link ElementMeteringDecorator#timerName}.
  *
  * C - type of translation context.
  */
-class AroundElementMeteringDecorator<C> implements AroundElement<C> {
+class ElementMeteringDecorator<C> implements AroundElement<C> {
 
     /**
      * Translator to be decorated.
@@ -56,8 +56,8 @@ class AroundElementMeteringDecorator<C> implements AroundElement<C> {
      * @param metricRegistry Registry where to report metrics.
      * @param metricsBaseName Prefix for metric names.
      */
-    AroundElementMeteringDecorator(@Nonnull AroundElement<C> next, @Nonnull MetricRegistry metricRegistry,
-                                   @Nonnull String metricsBaseName) {
+    ElementMeteringDecorator(@Nonnull AroundElement<C> next, @Nonnull MetricRegistry metricRegistry,
+                             @Nonnull String metricsBaseName) {
         this.next = next
         this.metricRegistry = metricRegistry
         this.metricsBaseName = metricsBaseName

@@ -15,7 +15,7 @@ import javax.annotation.Nullable
  * R - type of elements in resulting batch.
  * C - type of translation context.
  */
-class MeteredBatchTracingDecorator<O, R, C> extends BatchTracingDecorator<O, R, C> {
+class BatchTracingMeteredDecorator<O, R, C> extends BatchTracingDecorator<O, R, C> {
 
     @Nonnull
     private final com.codahale.metrics.Timer timer
@@ -28,7 +28,7 @@ class MeteredBatchTracingDecorator<O, R, C> extends BatchTracingDecorator<O, R, 
      * @param metricRegistry Registry where to report metric.
      * @param metricName Name of metric that will hold tracing time.
      */
-    MeteredBatchTracingDecorator(
+    BatchTracingMeteredDecorator(
             BatchTranslator<O, R, C> next,
             BatchDumper<O, C> inDumper,
             BatchDumper<R, C> outDumper,
