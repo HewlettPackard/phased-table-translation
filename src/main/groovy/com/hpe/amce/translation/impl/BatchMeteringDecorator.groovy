@@ -25,12 +25,12 @@ import java.util.concurrent.Callable
  * all metrics.
  *
  * It is possible to override default metric names via
- * {@link BatchMeteringDecorator#getIncomingBatchCountMetricName},
- * {@link BatchMeteringDecorator#getIncomingBatchSizeMetricName},
- * {@link BatchMeteringDecorator#getIncomingElementsCountMetricName},
- * {@link BatchMeteringDecorator#getTranslationTimeMetricName},
- * {@link BatchMeteringDecorator#getOutgoingBatchSizeMetricName},
- * {@link BatchMeteringDecorator#getOutgoingElementsCountMetricName}.
+ * {@link BatchMeteringDecorator#incomingBatchCountMetricName},
+ * {@link BatchMeteringDecorator#incomingBatchSizeMetricName},
+ * {@link BatchMeteringDecorator#incomingElementsCountMetricName},
+ * {@link BatchMeteringDecorator#translationTimeMetricName},
+ * {@link BatchMeteringDecorator#outgoingBatchSizeMetricName},
+ * {@link BatchMeteringDecorator#outgoingElementsCountMetricName}.
  *
  * O - type of elements in original batch.
  * R - type of elements in resulting batch.
