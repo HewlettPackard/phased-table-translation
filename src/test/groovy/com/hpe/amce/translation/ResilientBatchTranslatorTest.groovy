@@ -1,6 +1,5 @@
 package com.hpe.amce.translation
 
-import com.codahale.metrics.Histogram
 import com.codahale.metrics.MetricRegistry
 import org.apache.logging.log4j.Level
 import spock.lang.Specification
@@ -217,26 +216,38 @@ class ResilientBatchTranslatorTest extends Specification {
         }
     }
 
-    def "batch sizes recorded in metrics"() {
+    def "metrics recorded"() {
         given:
         instance.processingStages = [
-                trans: { RawEvent event, Object[] params ->
+                dropEven  : { RawEvent event, Object[] params ->
+                    event.num % 2 == 0 ? [] : [event]
+                },
+                translator: { RawEvent event, Object[] params ->
                     [new TranslatedEvent(num: event.num)]
                 },
         ]
         instance.lookupLoggers()
+        int batchCount = 3
+        int batchSize = 4
+        long expectedOutBatchSize = (batchSize / 2).longValueExact()
         when:
-        Histogram histogram = instance.metricRegistry.histogram(getClass().name + ".in.batch_size")
-        instance.translateBatch([
-                new RawEvent(num: 1),
-                new RawEvent(num: 2),
-                new RawEvent(num: 3),
-                new RawEvent(num: 4),
-        ], new Context(param: "ems"))
+        (1..batchCount).each {
+            instance.translateBatch((1..batchSize).collect { new RawEvent(num: it) }, new Context(param: "ems"))
+        }
         then:
-        histogram.count == 1
-        histogram.snapshot.min == 4
-        histogram.snapshot.max == 4
+        println 'counters:' + instance.metricRegistry.counters*.key
+        println 'gauges:' + instance.metricRegistry.gauges*.key
+        println 'histograms:' + instance.metricRegistry.histograms*.key
+        println 'meters:' + instance.metricRegistry.meters*.key
+        println 'timers:' + instance.metricRegistry.timers*.key
+        instance.metricRegistry.histogram(getClass().name + ".in.batch_size").snapshot.max == batchSize
+        instance.metricRegistry.histogram(getClass().name + ".out.batch_size").snapshot.max == expectedOutBatchSize
+        instance.metricRegistry.meter(getClass().name + ".batches").count == batchCount
+        instance.metricRegistry.meter(getClass().name + ".in.events").count == batchCount * batchSize
+        instance.metricRegistry.meter(getClass().name + ".out.events").count == batchCount * expectedOutBatchSize
+        instance.metricRegistry.timer(getClass().name + ".translate_batch").count == batchCount
+        instance.metricRegistry.timer(getClass().name + ".one.dropEven").count == batchCount * batchSize
+        instance.metricRegistry.timer(getClass().name + ".one.translator").count == batchCount * expectedOutBatchSize
     }
 
     def "all types of errors are caught"() {
