@@ -8,7 +8,6 @@ import org.apache.logging.log4j.test.appender.ListAppender
 import spock.lang.Shared
 import spock.lang.Specification
 
-// TODO: verify tracing?
 class ResilientBatchTranslatorTest extends Specification {
 
     class RawEvent {
