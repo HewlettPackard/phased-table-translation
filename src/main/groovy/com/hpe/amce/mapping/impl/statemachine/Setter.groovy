@@ -2,10 +2,12 @@ package com.hpe.amce.mapping.impl.statemachine
 
 import com.hpe.amce.mapping.Field
 import com.hpe.amce.mapping.MappingContext
+import groovy.transform.CompileStatic
 
 /**
  * Pushes result value to setter.
  */
+@CompileStatic
 class Setter extends AbstractState {
 
     @Override

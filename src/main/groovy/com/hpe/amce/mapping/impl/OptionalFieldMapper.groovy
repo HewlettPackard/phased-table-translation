@@ -3,6 +3,7 @@ package com.hpe.amce.mapping.impl
 import com.hpe.amce.mapping.Field
 import com.hpe.amce.mapping.MappingContext
 import com.hpe.amce.mapping.impl.statemachine.*
+import groovy.transform.CompileStatic
 
 import javax.annotation.Nonnull
 
@@ -29,6 +30,7 @@ import javax.annotation.Nonnull
  * RO - Resulting object type.
  * P - Type of parameters object.
  */
+@CompileStatic
 class OptionalFieldMapper<OO, RO, P> extends AbstractStateMachineFieldMapper<OO, RO, P> {
 
     @Nonnull

@@ -3,6 +3,7 @@ package com.hpe.amce.mapping.impl.statemachine
 import com.hpe.amce.mapping.Field
 import com.hpe.amce.mapping.MappingContext
 import com.hpe.amce.mapping.impl.MessageFormatter
+import groovy.transform.CompileStatic
 
 /**
  * Warn if next step is defined, throw otherwise.
@@ -11,6 +12,7 @@ import com.hpe.amce.mapping.impl.MessageFormatter
  * If next step is not defined then instead it throws data error with the same message
  * as would be logged.
  */
+@CompileStatic
 abstract class WarnIfDefinedOrDataError extends Warn {
 
     /**

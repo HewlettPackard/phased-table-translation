@@ -5,6 +5,7 @@ import com.hpe.amce.mapping.FieldMapper
 import com.hpe.amce.mapping.MappingContext
 import com.hpe.amce.mapping.impl.statemachine.MachineContext
 import com.hpe.amce.mapping.impl.statemachine.State
+import groovy.transform.CompileStatic
 import groovy.util.logging.Log4j2
 
 import javax.annotation.Nonnull
@@ -29,6 +30,7 @@ import javax.annotation.Nonnull
  * P - Type of parameters object.
  */
 @Log4j2
+@CompileStatic
 abstract class AbstractStateMachineFieldMapper<OO, RO, P> implements FieldMapper<OO, RO, P> {
 
     @Override

@@ -1,5 +1,7 @@
 package com.hpe.amce.translation.impl
 
+import groovy.transform.CompileStatic
+
 import javax.annotation.Nonnull
 import javax.annotation.Nullable
 
@@ -22,6 +24,7 @@ import javax.annotation.Nullable
  * {@link FormattingToStringDumper#estimatedDumpedEventSize} can be adjusted
  * to avoid resizing of this buffer.
  */
+@CompileStatic
 class FormattingToStringDumper implements BatchDumper<Object, Object>, StageDumper<Object> {
 
     /**

@@ -2,6 +2,7 @@ package com.hpe.amce.mapping.impl
 
 import com.hpe.amce.mapping.Field
 import com.hpe.amce.mapping.MappingContext
+import groovy.transform.CompileStatic
 
 import javax.annotation.Nonnull
 
@@ -17,6 +18,7 @@ import javax.annotation.Nonnull
  *     <li>provided message</li>
  * </ul>
  */
+@CompileStatic
 class SingleLineMesasgeFormatter implements MessageFormatter {
 
     /**

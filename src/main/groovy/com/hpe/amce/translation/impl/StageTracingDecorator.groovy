@@ -1,5 +1,6 @@
 package com.hpe.amce.translation.impl
 
+import groovy.transform.CompileStatic
 import groovy.util.logging.Log4j2
 import org.apache.logging.log4j.Level
 import org.apache.logging.log4j.Logger
@@ -22,6 +23,7 @@ import javax.annotation.Nullable
  * C - type of translation context.
  */
 @Log4j2
+@CompileStatic
 class StageTracingDecorator<C> implements AroundStage<C> {
 
     /**

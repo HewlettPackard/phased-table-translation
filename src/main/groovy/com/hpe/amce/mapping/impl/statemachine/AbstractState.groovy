@@ -2,6 +2,7 @@ package com.hpe.amce.mapping.impl.statemachine
 
 import com.hpe.amce.mapping.Field
 import com.hpe.amce.mapping.MappingContext
+import groovy.transform.CompileStatic
 
 import javax.annotation.Nonnull
 import javax.annotation.Nullable
@@ -13,6 +14,7 @@ import javax.annotation.Nullable
  * egg-chicken problem, {@link AbstractState#configure} should be used
  * to configure a state once it is created.
  */
+@CompileStatic
 abstract class AbstractState implements State {
 
     private State onException

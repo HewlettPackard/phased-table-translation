@@ -2,10 +2,12 @@ package com.hpe.amce.mapping.impl.statemachine
 
 import com.hpe.amce.mapping.Field
 import com.hpe.amce.mapping.MappingContext
+import groovy.transform.CompileStatic
 
 /**
  * Obtains default value.
  */
+@CompileStatic
 class Defaulter extends AbstractState {
 
     @Override

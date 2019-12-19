@@ -2,6 +2,7 @@ package com.hpe.amce.translation.impl
 
 import com.codahale.metrics.MetricRegistry
 import com.hpe.amce.translation.BatchTranslator
+import groovy.transform.CompileStatic
 
 import javax.annotation.Nonnull
 import javax.annotation.Nullable
@@ -36,6 +37,7 @@ import java.util.concurrent.Callable
  * R - type of elements in resulting batch.
  * C - type of translation context.
  */
+@CompileStatic
 class BatchMeteringDecorator<O, R, C> implements BatchTranslator<O, R, C> {
 
     /**

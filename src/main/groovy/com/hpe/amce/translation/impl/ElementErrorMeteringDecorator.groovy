@@ -1,6 +1,7 @@
 package com.hpe.amce.translation.impl
 
 import com.codahale.metrics.MetricRegistry
+import groovy.transform.CompileStatic
 
 import javax.annotation.Nonnull
 import javax.annotation.Nullable
@@ -16,6 +17,7 @@ import javax.annotation.Nullable
  *
  * C - type of translation context.
  */
+@CompileStatic
 class ElementErrorMeteringDecorator<C> implements AroundElement<C> {
 
     /**
@@ -45,7 +47,7 @@ class ElementErrorMeteringDecorator<C> implements AroundElement<C> {
      * Where STAGENAME is a name of the stage that has caused an error.
      */
     @Nonnull
-    Closure<String> meterName = { "${metricsBaseName}${it}.error" }
+    Closure<String> meterName = { "${metricsBaseName}${it}.error".toString() }
 
     /**
      * Creates an instance.

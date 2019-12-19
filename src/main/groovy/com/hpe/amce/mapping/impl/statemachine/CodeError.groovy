@@ -3,6 +3,7 @@ package com.hpe.amce.mapping.impl.statemachine
 import com.hpe.amce.mapping.Field
 import com.hpe.amce.mapping.MappingContext
 import com.hpe.amce.mapping.impl.MessageFormatter
+import groovy.transform.CompileStatic
 
 import javax.annotation.Nonnull
 
@@ -10,6 +11,7 @@ import javax.annotation.Nonnull
  * Represents code error.
  * Does not need to be configured.
  */
+@CompileStatic
 class CodeError extends AbstractState {
 
     @Nonnull

@@ -1,5 +1,7 @@
 package com.hpe.amce.translation.impl
 
+import groovy.transform.CompileStatic
+
 import javax.annotation.Nonnull
 import javax.annotation.Nullable
 
@@ -17,6 +19,7 @@ import javax.annotation.Nullable
  *
  * C - type of translation context.
  */
+@CompileStatic
 class ElementErrorSuppressorDecorator<C> implements AroundElement<C> {
 
     @Nonnull

@@ -1,6 +1,7 @@
 package com.hpe.amce.mapping
 
 import groovy.transform.Canonical
+import groovy.transform.CompileStatic
 import groovy.transform.stc.ClosureParams
 import groovy.transform.stc.FromString
 
@@ -27,6 +28,7 @@ import javax.annotation.Nullable
 @Canonical
 // We're referencing type parameters in annotations. Can't make constants out of these
 @SuppressWarnings('DuplicateStringLiteral')
+@CompileStatic
 class Field<OO, RO, OF, RF, P> {
 
     /**

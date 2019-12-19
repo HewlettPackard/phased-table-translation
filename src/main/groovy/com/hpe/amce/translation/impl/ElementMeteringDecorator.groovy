@@ -1,6 +1,7 @@
 package com.hpe.amce.translation.impl
 
 import com.codahale.metrics.MetricRegistry
+import groovy.transform.CompileStatic
 
 import javax.annotation.Nonnull
 import javax.annotation.Nullable
@@ -20,6 +21,7 @@ import java.util.concurrent.Callable
  *
  * C - type of translation context.
  */
+@CompileStatic
 class ElementMeteringDecorator<C> implements AroundElement<C> {
 
     /**
@@ -48,7 +50,7 @@ class ElementMeteringDecorator<C> implements AroundElement<C> {
      * By default, this is {@link #metricsBaseName}STAGENAME.one.
      */
     @Nonnull
-    Closure<String> timerName = { String stageName -> "$metricsBaseName${stageName}.one" }
+    Closure<String> timerName = { String stageName -> "$metricsBaseName${stageName}.one".toString() }
 
     /**
      * Creates new instance.

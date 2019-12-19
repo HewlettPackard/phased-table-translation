@@ -1,6 +1,7 @@
 package com.hpe.amce.translation.impl
 
 import com.codahale.metrics.MetricRegistry
+import groovy.transform.CompileStatic
 import groovy.util.logging.Log4j2
 
 import javax.annotation.Nonnull
@@ -28,6 +29,7 @@ import java.util.concurrent.Callable
  * C - type of translation context.
  */
 @Log4j2
+@CompileStatic
 class StageMeteringDecorator<C> implements AroundStage<C> {
 
     /**
@@ -59,7 +61,7 @@ class StageMeteringDecorator<C> implements AroundStage<C> {
      * By default, this is {@link #metricsBaseName}STAGENAME.delta.
      */
     @Nonnull
-    Closure<String> deltaBatchSizeMetricName = { String stageName -> "$metricsBaseName${stageName}.delta" }
+    Closure<String> deltaBatchSizeMetricName = { String stageName -> "$metricsBaseName${stageName}.delta".toString() }
 
     /**
      * Name of the metric that will report time it took to process a batch on a stage.
@@ -69,7 +71,8 @@ class StageMeteringDecorator<C> implements AroundStage<C> {
      * By default, this is {@link #metricsBaseName}STAGENAME.batch.
      */
     @Nonnull
-    Closure<String> stageTimerMetricName = { String stageName -> "$metricsBaseName${stageName}.batch" }
+    Closure<String> stageTimerMetricName =
+            { String stageName -> "$metricsBaseName${stageName}.batch".toString().toString() }
 
     /**
      * Creates new instance.
@@ -89,7 +92,7 @@ class StageMeteringDecorator<C> implements AroundStage<C> {
                        @Nonnull List<?> elements, @Nullable C context) {
         List<?> result = metricRegistry.timer(stageTimerMetricName(stageName)).time({
             next.applyStage(stageName, stageCode, elements, context)
-        } as Callable)
+        } as Callable<List<?>>)
         metricRegistry.histogram(deltaBatchSizeMetricName(stageName)).update(
                 (result?.size() ?: 0) - (elements?.size() ?: 0))
         result

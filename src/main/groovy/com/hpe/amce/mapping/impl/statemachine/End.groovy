@@ -2,11 +2,13 @@ package com.hpe.amce.mapping.impl.statemachine
 
 import com.hpe.amce.mapping.Field
 import com.hpe.amce.mapping.MappingContext
+import groovy.transform.CompileStatic
 
 /**
  * Ends processing.
  * Does not need to be configured.
  */
+@CompileStatic
 class End extends AbstractState {
 
     @Override

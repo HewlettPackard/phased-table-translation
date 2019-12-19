@@ -1,6 +1,7 @@
 package com.hpe.amce.mapping
 
 import groovy.transform.Canonical
+import groovy.transform.CompileStatic
 
 /**
  * Contains mapping context.
@@ -10,6 +11,7 @@ import groovy.transform.Canonical
  * P - Type of parameters object.
  */
 @Canonical
+@CompileStatic
 class MappingContext<OO, RO, P> {
 
     /**

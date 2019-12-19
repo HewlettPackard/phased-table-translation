@@ -3,6 +3,7 @@ package com.hpe.amce.mapping.impl.statemachine
 import com.hpe.amce.mapping.Field
 import com.hpe.amce.mapping.MappingContext
 import com.hpe.amce.mapping.impl.MessageFormatter
+import groovy.transform.CompileStatic
 import groovy.util.logging.Log4j2
 
 import javax.annotation.Nonnull
@@ -11,6 +12,7 @@ import javax.annotation.Nonnull
  * Pushes a warning to log and then delegates to another step.
  */
 @Log4j2
+@CompileStatic
 abstract class Warn extends AbstractState {
 
     @Nonnull

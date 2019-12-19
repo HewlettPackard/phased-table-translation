@@ -4,6 +4,7 @@ import com.hpe.amce.mapping.Field
 import com.hpe.amce.mapping.FieldMapper
 import com.hpe.amce.mapping.MappingContext
 import com.hpe.amce.mapping.ObjectMapper
+import groovy.transform.CompileStatic
 
 import javax.annotation.Nonnull
 import javax.annotation.Nullable
@@ -19,6 +20,7 @@ import javax.annotation.Nullable
  * RO - Resulting object type.
  * P - Type of parameters object.
  */
+@CompileStatic
 class SimpleObjectMapper<OO, RO, P> implements ObjectMapper<OO, RO, P> {
 
     /**

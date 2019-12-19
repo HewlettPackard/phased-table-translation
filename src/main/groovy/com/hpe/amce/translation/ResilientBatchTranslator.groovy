@@ -2,6 +2,8 @@ package com.hpe.amce.translation
 
 import com.codahale.metrics.MetricRegistry
 import com.codahale.metrics.Timer
+import groovy.transform.CompileDynamic
+import groovy.transform.CompileStatic
 import groovy.util.logging.Log4j2
 import org.apache.logging.log4j.Level
 import org.apache.logging.log4j.LogManager
@@ -32,6 +34,7 @@ import java.util.concurrent.Callable
  */
 @Deprecated
 @Log4j2
+@CompileStatic
 class ResilientBatchTranslator<C> {
 
     /**
@@ -224,9 +227,9 @@ class ResilientBatchTranslator<C> {
     void lookupLoggers() {
         assert processingStages
         loggers = processingStages.collectEntries { String stageName, Closure<?> code ->
-            [stageName, LogManager.getLogger("${name}.${stageName}"),]
+            [stageName, LogManager.getLogger("${name}.${stageName}".toString()),]
         } as Map<String, Logger>
-        loggerIn = LogManager.getLogger("${name}.input")
+        loggerIn = LogManager.getLogger("${name}.input".toString())
     }
 
     /**
@@ -282,6 +285,7 @@ class ResilientBatchTranslator<C> {
         }
 
         @Override
+        @CompileDynamic
         List<?> call() throws Exception {
             StringBuilder buffer = new StringBuilder(estimatedDumpedEventSide * (1 + events.size()))
             traceStage(buffer, loggerIn, 'input', events, context)

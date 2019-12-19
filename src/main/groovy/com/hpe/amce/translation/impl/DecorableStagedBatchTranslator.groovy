@@ -1,6 +1,7 @@
 package com.hpe.amce.translation.impl
 
 import com.hpe.amce.translation.BatchTranslator
+import groovy.transform.CompileStatic
 
 import javax.annotation.Nonnull
 import javax.annotation.Nullable
@@ -26,6 +27,7 @@ import javax.annotation.Nullable
  * R - type of result elements.
  * C - type of translation context.
  */
+@CompileStatic
 class DecorableStagedBatchTranslator<O, R, C> implements BatchTranslator<O, R, C> {
 
     /**

@@ -1,6 +1,7 @@
 package com.hpe.amce.translation.impl
 
 import com.hpe.amce.translation.BatchTranslator
+import groovy.transform.CompileStatic
 import org.apache.logging.log4j.Level
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
@@ -26,6 +27,7 @@ import javax.annotation.Nullable
  * R - type of elements in resulting batch.
  * C - type of translation context.
  */
+@CompileStatic
 class BatchTracingDecorator<O, R, C> implements BatchTranslator<O, R, C> {
 
     /**

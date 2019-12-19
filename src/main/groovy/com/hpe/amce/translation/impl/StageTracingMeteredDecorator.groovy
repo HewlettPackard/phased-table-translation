@@ -2,6 +2,7 @@ package com.hpe.amce.translation.impl
 
 import com.codahale.metrics.MetricRegistry
 import com.codahale.metrics.Timer
+import groovy.transform.CompileStatic
 
 import javax.annotation.Nonnull
 import javax.annotation.Nullable
@@ -13,6 +14,7 @@ import javax.annotation.Nullable
  *
  * C - type of translation context.
  */
+@CompileStatic
 class StageTracingMeteredDecorator<C> extends StageTracingDecorator<C> {
 
     @Nonnull
