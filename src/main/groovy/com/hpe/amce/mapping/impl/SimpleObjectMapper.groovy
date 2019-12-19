@@ -47,7 +47,8 @@ class SimpleObjectMapper<OO, RO, P> implements ObjectMapper<OO, RO, P> {
         assert translated != null
         assert fields != null
         MappingContext<OO, RO, P> mappingContext =
-                new MappingContext<>(originalObject: raw, resultObject: translated, parameters: parameters)
+                // https://issues.apache.org/jira/browse/GROOVY-7419
+                new MappingContext<OO, RO, P>(originalObject: raw, resultObject: translated, parameters: parameters)
         fields.each { field, mandatory ->
             (mandatory ? mandatoryFieldMapper : optionalFieldMapper).mapField(field, mappingContext)
         }
