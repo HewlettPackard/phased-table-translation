@@ -2,6 +2,10 @@ package com.hpe.amce.translation
 
 import com.codahale.metrics.MetricRegistry
 import org.apache.logging.log4j.Level
+import org.apache.logging.log4j.core.LogEvent
+import org.apache.logging.log4j.core.LoggerContext
+import org.apache.logging.log4j.test.appender.ListAppender
+import spock.lang.Shared
 import spock.lang.Specification
 
 // TODO: verify tracing?
@@ -9,23 +13,43 @@ class ResilientBatchTranslatorTest extends Specification {
 
     class RawEvent {
         int num
+
+        @Override
+        String toString() {
+            "r$num"
+        }
     }
 
     class TranslatedEvent {
         int num
+
+        @Override
+        String toString() {
+            "t$num"
+        }
     }
 
     class Context {
         String param
+
+        @Override
+        String toString() {
+            "c$param"
+        }
     }
 
     ResilientBatchTranslator<Context> instance
+
+    @Shared
+    private ListAppender listAppender = LoggerContext.getContext(false).
+            getRootLogger().appenders.get("LIST") as ListAppender
 
     void setup() {
         instance = new ResilientBatchTranslator()
         instance.name = getClass().name
         instance.traceLevel = Level.INFO
         instance.metricRegistry = new MetricRegistry()
+        listAppender.clear()
     }
 
     def "simple case with context"() {
@@ -282,6 +306,40 @@ class ResilientBatchTranslatorTest extends Specification {
         assert translated.size() == 1
         assert translated[0] && translated[0] instanceof TranslatedEvent
         assert translated[0].num == 4
+    }
+
+    def "data is traced"() {
+        given:
+        instance.processingStages = [
+                stage1: { RawEvent raw, Context context -> [new RawEvent(num: raw.num + 1)] },
+                stage2: { RawEvent raw, Context context -> [new RawEvent(num: raw.num + 1)] },
+                stage3: { RawEvent raw, Context context -> [new TranslatedEvent(num: raw.num + 1)] },
+        ]
+        instance.lookupLoggers()
+        when:
+        instance.translateBatch([
+                new RawEvent(num: 1000),
+                new RawEvent(num: 2000),
+                new RawEvent(num: 3000)
+        ],
+                new Context(param: "ems"))
+        List<LogEvent> logs = listAppender.events.findAll { it.loggerName.startsWith(instance.name) }
+        then: "uses specified log level"
+        logs.every { it.level == instance.traceLevel }
+        then: "context is always logged"
+        logs.every { it.message.formattedMessage.contains('ems') }
+        then: "input is logged"
+        logs.find { it.message.formattedMessage.contains('1000') }.loggerName.endsWith('input')
+        then: "intermediate stages are logged"
+        logs.find { it.message.formattedMessage.contains('1001') }.loggerName.endsWith('stage1')
+        logs.find { it.message.formattedMessage.contains('1002') }.loggerName.endsWith('stage2')
+        then: "output is logged"
+        logs.find { it.message.formattedMessage.contains('1003') }.loggerName.endsWith('stage3')
+        then: "elements separated by new line"
+        logs.find { it.message.formattedMessage.contains('1000') }.message.formattedMessage
+                .split(System.lineSeparator())
+                .findAll { line -> ['1000', '2000', '3000'].any { line.contains(it) } }
+                .size() == 3
     }
 
 }
