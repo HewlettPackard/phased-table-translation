@@ -93,7 +93,7 @@ groovydoc {
 }
 
 task groovydocJar(type: Jar, dependsOn: groovydoc) {
-    archiveClassifier.set('groovydoc')
+    archiveClassifier.set('javadoc')
     from groovydoc.destinationDir
 }
 
