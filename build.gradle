@@ -1,12 +1,13 @@
 plugins {
     id 'groovy'
+    id 'maven-publish'
     id "ru.vyarus.quality" version "4.0.0"
     id "com.github.ben-manes.versions" version "0.27.0"
 }
 
 description = "A library that facilitates translation from one data format to another. Handles batches of messages and fields of objects."
 group = "com.hpe.amce"
-version = "1.0-SNAPSHOT"
+version = "1.0.0-SNAPSHOT"
 
 repositories {
     jcenter()
@@ -85,3 +86,51 @@ dependencyUpdates {
     }
 }
 check.dependsOn dependencyUpdates
+
+groovydoc {
+    noTimestamp = true
+    noVersionStamp = true
+}
+
+task groovydocJar(type: Jar, dependsOn: groovydoc) {
+    archiveClassifier.set('groovydoc')
+    from groovydoc.destinationDir
+}
+
+task sourcesJar(type: Jar) {
+    archiveClassifier.set('sources')
+    from sourceSets.main.allSource
+}
+
+artifacts {
+    archives sourcesJar
+    archives groovydocJar
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from components.java
+            artifact sourcesJar
+            artifact groovydocJar
+            pom {
+                licenses {
+                    license {
+                        name = 'The Apache License, Version 2.0'
+                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+            }
+            versionMapping {
+                usage('java-api') {
+                    fromResolutionOf('runtimeClasspath')
+                }
+                usage('java-runtime') {
+                    fromResolutionResult()
+                }
+            }
+        }
+    }
+}
+
+defaultTasks = [publishToMavenLocal.name]
