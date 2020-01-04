@@ -30,10 +30,11 @@ dependencies {
 }
 ```
 
-You can also browse
-https://jitpack.io/com/github/HewlettPackard/phased-table-translation/latest/javadoc/[latest javadoc]
-or https://jitpack.io/com/github/HewlettPackard/phased-table-translation/1.0.0/javadoc/[javadoc for specific version]
-on Jitpack.
+You can also browse on Jitpack:
+
+* https://jitpack.io/com/github/HewlettPackard/phased-table-translation/master-SNAPSHOT/javadoc/[latest snapshot javadoc]
+* https://jitpack.io/com/github/HewlettPackard/phased-table-translation/latest/javadoc/[latest released version javadoc]
+* https://jitpack.io/com/github/HewlettPackard/phased-table-translation/1.0.0/javadoc/[javadoc for specific released version]
 
 See Jitpack https://jitpack.io/docs/[documentation]
 and https://jitpack.io/docs/FAQ/[FAQ] for a list of
