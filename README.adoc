@@ -1,1 +1,40 @@
-TODO
+== Usage
+
+The library is available via https://jitpack.io/[Jitpack].
+
+The following example shows how to use a latest snapshot:
+
+```groovy
+repositories {
+    maven { url "https://jitpack.io" }
+}
+
+configurations.all {
+    resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+}
+
+dependencies {
+    implementation 'com.github.HewlettPackard:phased-table-translation:master-SNAPSHOT'
+}
+```
+
+The following example shows how to use specific release version:
+
+```groovy
+repositories {
+    maven { url "https://jitpack.io" }
+}
+
+dependencies {
+    implementation 'com.github.HewlettPackard:phased-table-translation:1.0.0'
+}
+```
+
+You can also browse
+https://jitpack.io/com/github/HewlettPackard/phased-table-translation/latest/javadoc/[latest javadoc]
+or https://jitpack.io/com/github/HewlettPackard/phased-table-translation/1.0.0/javadoc/[javadoc for specific version]
+on Jitpack.
+
+See Jitpack https://jitpack.io/docs/[documentation]
+and https://jitpack.io/docs/FAQ/[FAQ] for a list of
+all Jitpack features.

@@ -13,12 +13,12 @@ import java.util.concurrent.Callable
  *
  * The following metrics will be published:
  * <ul>
- *     <li>Received number of batches</li>
- *     <li>Size of incoming batches</li>
- *     <li>Total number of incoming elements across all batches</li>
- *     <li>Time it takes to translate a batch</li>
- *     <li>Size of resulting batches</li>
- *     <li>Total number of resulting elements across all batches</li>
+ *     <li>Received number of batches - meter</li>
+ *     <li>Size of incoming batches - histogram</li>
+ *     <li>Total number of incoming elements across all batches - meter</li>
+ *     <li>Time it takes to translate a batch - timer</li>
+ *     <li>Size of resulting batches - histogram</li>
+ *     <li>Total number of resulting elements across all batches - meter</li>
  * </ul>
  *
  * Metrics will be published in {@link BatchMeteringDecorator#metricRegistry} with
