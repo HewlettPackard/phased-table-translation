@@ -1,3 +1,4 @@
+image:https://img.shields.io/github/license/HewlettPackard/phased-table-translation[GitHub]
 image:https://img.shields.io/circleci/build/github/HewlettPackard/phased-table-translation[CircleCI]
 image:https://img.shields.io/github/v/release/HewlettPackard/phased-table-translation?sort=semver[GitHub release (latest SemVer)]
 image:https://img.shields.io/jitpack/v/github/HewlettPackard/phased-table-translation[JitPack]
