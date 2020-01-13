@@ -83,7 +83,7 @@ class StageTracingDecorator<C> implements AroundStage<C> {
         if (!loggers) {
             return log
         }
-        loggers[stage + isIn ? '.in' : '.out'] ?: log
+        loggers[stage + (isIn ? '.in' : '.out')] ?: log
     }
 
     /**
