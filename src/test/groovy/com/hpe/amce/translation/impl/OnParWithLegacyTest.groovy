@@ -78,7 +78,8 @@ class OnParWithLegacyTest extends Specification {
                 new ElementMeteringDecorator<>(
                         new ElementErrorSuppressorDecorator<>(
                                 new ElementErrorMeteringDecorator<>(
-                                        new StageCaller<>(),
+                                        new ElementErrorLoggerDecorator<>(
+                                                new StageCaller<>()),
                                         metricRegistry,
                                         getClass().name + '.')
                         ),
@@ -419,6 +420,39 @@ class OnParWithLegacyTest extends Specification {
                 .split(System.lineSeparator())
                 .findAll { line -> ['1000', '2000', '3000'].any { line.contains(it) } }
                 .size() == 3
+    }
+
+    def "errors are logged"() {
+        given:
+        RawEvent input = new RawEvent(num: 13)
+        Context context = new Context(param: "ems")
+        Throwable error = new IllegalArgumentException("test")
+        instance.processingStages = [
+                errorStage: { RawEvent translationElement, Context translationContext ->
+                    throw error
+                },
+        ]
+        when:
+        instance.translateBatch([input], context)
+        then: "there is an ERROR message with the exception"
+        Closure<List<Throwable>> unroll = { Throwable root ->
+            List<Throwable> unrolled = []
+            while (root != null) {
+                unrolled << root
+                root = root.cause
+            }
+            unrolled
+        }
+        List<LogEvent> logs = listAppender.events.findAll {
+            it.level == Level.ERROR && unroll(it.thrown).any { it == error }
+        }
+        logs.size() == 1
+        and: "erroneous stage name is logged"
+        logs.first().message.formattedMessage.contains('errorStage')
+        and: "context is logged"
+        logs.first().message.formattedMessage.contains(context.toString())
+        and: "element causing error is logged"
+        logs.first().message.formattedMessage.contains(input.toString())
     }
 
 }
