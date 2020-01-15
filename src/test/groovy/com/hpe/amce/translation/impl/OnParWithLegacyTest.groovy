@@ -45,7 +45,7 @@ class OnParWithLegacyTest extends Specification {
         }
     }
 
-    DecorableStagedBatchTranslator<RawEvent, TranslatedEvent, Context> instance
+    BatchTranslator<RawEvent, TranslatedEvent, Context> instance
 
     MetricRegistry metricRegistry
 
@@ -53,7 +53,7 @@ class OnParWithLegacyTest extends Specification {
     private ListAppender listAppender = LoggerContext.getContext(false).
             getRootLogger().appenders.get("LIST") as ListAppender
 
-    DecorableStagedBatchTranslator<RawEvent, TranslatedEvent, Context> createInstance(
+    BatchTranslator<RawEvent, TranslatedEvent, Context> createInstance(
             Map<String, Closure<List<?>>> processingStages) {
         AroundElement<Context> aroundElement =
                 new ElementMeteringDecorator<>(
@@ -85,28 +85,26 @@ class OnParWithLegacyTest extends Specification {
                         LogManager.getLogger(OnParWithLegacyTest.name + (isIn ? '.in' : '') + ".$stage")
                     }
                 }
-        BatchTranslator<RawEvent, TranslatedEvent, Context> meteringDecorator =
+        new BatchTracingDecorator<RawEvent, TranslatedEvent, Context>(
                 new BatchMeteringDecorator<RawEvent, TranslatedEvent, Context>(
-                        new StagesCaller<RawEvent, TranslatedEvent, Context>(processingStages, aroundStage),
+                        new StagesCaller<RawEvent, TranslatedEvent, Context>(
+                                processingStages,
+                                aroundStage),
                         metricRegistry,
                         getClass().name
                 ).tap { decorator ->
                     // Force legacy metric names
                     decorator.incomingBatchCountMetricName = { "${decorator.metricsBaseName}.batches" }
-                }
-        BatchTranslator<RawEvent, TranslatedEvent, Context> aroundBatch =
-                new BatchTracingDecorator<RawEvent, TranslatedEvent, Context>(
-                        meteringDecorator,
-                        new FormattingToStringDumper<>(),
-                        new FormattingToStringDumper<>()
-                ).tap {
-                    it.inLevel = Level.INFO
-                    it.outLevel = Level.INFO
-                    // Force legacy logger name
-                    it.inLogger = LogManager.getLogger(OnParWithLegacyTest.name + ".input")
-                    it.outLogger = LogManager.getLogger(OnParWithLegacyTest.name + ".output")
-                }
-        new DecorableStagedBatchTranslator<>(processingStages, aroundBatch, aroundStage, aroundElement)
+                },
+                new FormattingToStringDumper<>(),
+                new FormattingToStringDumper<>()
+        ).tap {
+            it.inLevel = Level.INFO
+            it.outLevel = Level.INFO
+            // Force legacy logger name
+            it.inLogger = LogManager.getLogger(OnParWithLegacyTest.name + ".input")
+            it.outLogger = LogManager.getLogger(OnParWithLegacyTest.name + ".output")
+        }
     }
 
     void setup() {
