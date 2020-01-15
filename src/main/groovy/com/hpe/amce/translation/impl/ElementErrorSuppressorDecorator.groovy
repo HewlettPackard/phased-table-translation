@@ -41,7 +41,7 @@ class ElementErrorSuppressorDecorator<C> implements AroundElement<C> {
         try {
             next.translateElement(stageName, stageCode, element, context)
         } catch (Throwable e) {
-            []
+            Collections.emptyList()
         }
     }
 }
