@@ -8,6 +8,8 @@ import javax.annotation.Nullable
  *
  * E - type of elements.
  * C - translation context.
+ *
+ * @see BatchDumper#dumpBatch
  */
 interface BatchDumper<E,C> {
 

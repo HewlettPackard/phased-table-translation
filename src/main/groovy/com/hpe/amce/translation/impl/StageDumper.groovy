@@ -7,6 +7,9 @@ import javax.annotation.Nullable
  * Dumps to string a batch of elements at specified stage.
  *
  * C - type of translation context.
+ *
+ * @see StageDumper#dumpBeforeStage
+ * @see StageDumper#dumpAfterStage
  */
 interface StageDumper<C> {
 

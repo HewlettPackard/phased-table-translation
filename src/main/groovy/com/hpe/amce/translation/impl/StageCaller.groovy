@@ -7,6 +7,8 @@ import javax.annotation.Nullable
 
 /**
  * Calls actual translator to translate element.
+ *
+ * Actual translator means closure specified for a particular stage.
  */
 @CompileStatic
 class StageCaller<C> implements AroundElement<C> {

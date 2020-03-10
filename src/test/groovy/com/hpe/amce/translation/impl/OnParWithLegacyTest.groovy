@@ -1,6 +1,7 @@
 package com.hpe.amce.translation.impl
 
 import com.codahale.metrics.MetricRegistry
+import com.hpe.amce.translation.BatchTranslator
 import org.apache.logging.log4j.Level
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.core.LogEvent
@@ -52,29 +53,9 @@ class OnParWithLegacyTest extends Specification {
     private ListAppender listAppender = LoggerContext.getContext(false).
             getRootLogger().appenders.get("LIST") as ListAppender
 
-    void setup() {
-        instance = new DecorableStagedBatchTranslator<>()
-        metricRegistry = new MetricRegistry()
-        instance.aroundBatch =
-                new BatchTracingDecorator<>(
-                        new BatchMeteringDecorator<>(
-                                instance.aroundBatch,
-                                metricRegistry,
-                                getClass().name
-                        ).tap { decorator ->
-                            // Force legacy metric names
-                            decorator.incomingBatchCountMetricName = { "${decorator.metricsBaseName}.batches" }
-                        },
-                        new FormattingToStringDumper(),
-                        new FormattingToStringDumper()
-                ).tap {
-                    it.inLevel = Level.INFO
-                    it.outLevel = Level.INFO
-                    // Force legacy logger name
-                    it.inLogger = LogManager.getLogger(OnParWithLegacyTest.name + ".input")
-                    it.outLogger = LogManager.getLogger(OnParWithLegacyTest.name + ".output")
-                }
-        instance.aroundElement =
+    DecorableStagedBatchTranslator<RawEvent, TranslatedEvent, Context> createInstance(
+            Map<String, Closure<List<?>>> processingStages) {
+        AroundElement<Context> aroundElement =
                 new ElementMeteringDecorator<>(
                         new ElementErrorSuppressorDecorator<>(
                                 new ElementErrorMeteringDecorator<>(
@@ -89,10 +70,10 @@ class OnParWithLegacyTest extends Specification {
                     // Force legacy metric names
                     it.timerName = { String stageName -> "${it.metricsBaseName}.one.$stageName" }
                 }
-        instance.aroundStage =
+        AroundStage<Context> aroundStage =
                 new StageTracingDecorator<>(
                         new StageMeteringDecorator<>(
-                                instance.aroundStage,
+                                new ActualStageProcessor<>(aroundElement),
                                 metricRegistry,
                                 getClass().name + '.'
                         ),
@@ -104,12 +85,38 @@ class OnParWithLegacyTest extends Specification {
                         LogManager.getLogger(OnParWithLegacyTest.name + (isIn ? '.in' : '') + ".$stage")
                     }
                 }
+        BatchTranslator<RawEvent, TranslatedEvent, Context> meteringDecorator =
+                new BatchMeteringDecorator<RawEvent, TranslatedEvent, Context>(
+                        new StagesCaller<RawEvent, TranslatedEvent, Context>(processingStages, aroundStage),
+                        metricRegistry,
+                        getClass().name
+                ).tap { decorator ->
+                    // Force legacy metric names
+                    decorator.incomingBatchCountMetricName = { "${decorator.metricsBaseName}.batches" }
+                }
+        BatchTranslator<RawEvent, TranslatedEvent, Context> aroundBatch =
+                new BatchTracingDecorator<RawEvent, TranslatedEvent, Context>(
+                        meteringDecorator,
+                        new FormattingToStringDumper<>(),
+                        new FormattingToStringDumper<>()
+                ).tap {
+                    it.inLevel = Level.INFO
+                    it.outLevel = Level.INFO
+                    // Force legacy logger name
+                    it.inLogger = LogManager.getLogger(OnParWithLegacyTest.name + ".input")
+                    it.outLogger = LogManager.getLogger(OnParWithLegacyTest.name + ".output")
+                }
+        new DecorableStagedBatchTranslator<>(processingStages, aroundBatch, aroundStage, aroundElement)
+    }
+
+    void setup() {
+        metricRegistry = new MetricRegistry()
         listAppender.clear()
     }
 
     def "simple case with context"() {
         given:
-        instance.processingStages = [
+        instance = createInstance([
                 pre  : { RawEvent event, Context context ->
                     assert event && event instanceof RawEvent
                     assert context?.param == "ems"
@@ -125,7 +132,7 @@ class OnParWithLegacyTest extends Specification {
                     assert context?.param == "ems"
                     [event]
                 },
-        ]
+        ])
         when:
         List translated = instance.translateBatch([new RawEvent()], new Context(param: "ems"))
         then:
@@ -136,7 +143,7 @@ class OnParWithLegacyTest extends Specification {
 
     def "context is optional"() {
         given:
-        instance.processingStages = [
+        instance = createInstance([
                 pre  : { RawEvent event, Context context ->
                     assert event && event instanceof RawEvent
                     assert !context
@@ -152,7 +159,7 @@ class OnParWithLegacyTest extends Specification {
                     assert !context
                     [event]
                 },
-        ]
+        ])
         when:
         List translated = instance.translateBatch([new RawEvent()], null)
         then:
@@ -163,7 +170,7 @@ class OnParWithLegacyTest extends Specification {
 
     def "errors on elements are ignored"() {
         given:
-        instance.processingStages = [
+        instance = createInstance([
                 pre  : { RawEvent event, Object[] params ->
                     if (event.num == 1) {
                         throw new NullPointerException("test exception that should be ignored")
@@ -182,7 +189,7 @@ class OnParWithLegacyTest extends Specification {
                     }
                     [event]
                 },
-        ]
+        ])
         when:
         List<TranslatedEvent> translated = instance.translateBatch([
                 new RawEvent(num: 1),
@@ -198,7 +205,7 @@ class OnParWithLegacyTest extends Specification {
 
     def "nulls are ignored"() {
         given:
-        instance.processingStages = [
+        instance = createInstance([
                 pre  : { RawEvent event, Object[] params ->
                     assert event && event instanceof RawEvent
                     null
@@ -211,7 +218,7 @@ class OnParWithLegacyTest extends Specification {
                     assert event && event instanceof TranslatedEvent
                     [event]
                 },
-        ]
+        ])
         when:
         List translated = instance.translateBatch([new RawEvent(), null], new Context(param: "ems"))
         then:
@@ -221,7 +228,7 @@ class OnParWithLegacyTest extends Specification {
 
     def "empty lists as result of closure means filtering"() {
         given:
-        instance.processingStages = [
+        instance = createInstance([
                 pre  : { RawEvent event, Object[] params ->
                     if (event.num == 1) {
                         return []
@@ -240,7 +247,7 @@ class OnParWithLegacyTest extends Specification {
                     }
                     [event]
                 },
-        ]
+        ])
         when:
         List<TranslatedEvent> translated = instance.translateBatch([
                 new RawEvent(num: 1),
@@ -257,7 +264,7 @@ class OnParWithLegacyTest extends Specification {
 
     def "translator can inject new elements"() {
         given:
-        instance.processingStages = [
+        instance = createInstance([
                 pre  : { RawEvent event, Object[] params ->
                     if (event.num == 1) {
                         return [event, new RawEvent(num: 2)]
@@ -276,7 +283,7 @@ class OnParWithLegacyTest extends Specification {
                     }
                     [event]
                 },
-        ]
+        ])
         when:
         List<TranslatedEvent> translated = instance.translateBatch([
                 new RawEvent(num: 1),
@@ -292,14 +299,14 @@ class OnParWithLegacyTest extends Specification {
 
     def "metrics recorded"() {
         given:
-        instance.processingStages = [
+        instance = createInstance([
                 dropEven  : { RawEvent event, Object[] params ->
                     event.num % 2 == 0 ? [] : [event]
                 },
                 translator: { RawEvent event, Object[] params ->
                     [new TranslatedEvent(num: event.num)]
                 },
-        ]
+        ])
         int batchCount = 3
         int batchSize = 4
         long expectedOutBatchSize = (batchSize / 2).longValueExact()
@@ -325,7 +332,7 @@ class OnParWithLegacyTest extends Specification {
 
     def "all types of errors are caught"() {
         given:
-        instance.processingStages = [
+        instance = createInstance([
                 npe        : { RawEvent event, Object[] params ->
                     if (event.num == 1) {
                         String npe = null
@@ -345,7 +352,7 @@ class OnParWithLegacyTest extends Specification {
                     }
                     [event]
                 },
-        ]
+        ])
         when:
         List<TranslatedEvent> translated = instance.translateBatch([
                 new RawEvent(num: 1),
@@ -363,7 +370,7 @@ class OnParWithLegacyTest extends Specification {
     def "erroneous elements are counted"() {
         given:
         int batchSize = 3
-        instance.processingStages = [
+        instance = createInstance([
                 even: { RawEvent event, Object[] params ->
                     if (event.num % 2 == 0) {
                         throw new NullPointerException("test exception that should be ignored")
@@ -376,7 +383,7 @@ class OnParWithLegacyTest extends Specification {
                     }
                     [new TranslatedEvent(num: event.num)]
                 },
-        ]
+        ])
         when:
         List<TranslatedEvent> translated = instance.translateBatch(
                 (1..batchSize).collect { new RawEvent(num: it) },
@@ -391,11 +398,11 @@ class OnParWithLegacyTest extends Specification {
 
     def "data is traced"() {
         given:
-        instance.processingStages = [
+        instance = createInstance([
                 stage1: { RawEvent raw, Context context -> [new RawEvent(num: raw.num + 1)] },
                 stage2: { RawEvent raw, Context context -> [new RawEvent(num: raw.num + 1)] },
                 stage3: { RawEvent raw, Context context -> [new TranslatedEvent(num: raw.num + 1)] },
-        ]
+        ])
         when:
         instance.translateBatch([
                 new RawEvent(num: 1000),
@@ -427,11 +434,11 @@ class OnParWithLegacyTest extends Specification {
         RawEvent input = new RawEvent(num: 13)
         Context context = new Context(param: "ems")
         Throwable error = new IllegalArgumentException("test")
-        instance.processingStages = [
+        instance = createInstance([
                 errorStage: { RawEvent translationElement, Context translationContext ->
                     throw error
                 },
-        ]
+        ])
         when:
         instance.translateBatch([input], context)
         then: "there is an ERROR message with the exception"

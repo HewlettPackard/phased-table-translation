@@ -23,9 +23,12 @@ import javax.annotation.Nullable
  * {@link StringBuilder} is used internally to concatenate all necessary information.
  * {@link FormattingToStringDumper#estimatedDumpedEventSize} can be adjusted
  * to avoid resizing of this buffer.
+ *
+ * E - type of elements.
+ * C - translation context.
  */
 @CompileStatic
-class FormattingToStringDumper implements BatchDumper<Object, Object>, StageDumper<Object> {
+class FormattingToStringDumper<E, C> implements BatchDumper<E, C>, StageDumper<C> {
 
     /**
      * Dumps a batch of elements.
@@ -87,14 +90,14 @@ class FormattingToStringDumper implements BatchDumper<Object, Object>, StageDump
     int estimatedDumpedEventSize = 10 * 1024
 
     @Override
-    String dumpBatch(@Nullable List<Object> batch, @Nullable Object context) {
+    String dumpBatch(@Nullable List<E> batch, @Nullable C context) {
         StringBuilder buffer = makeBufferForBatch(batch)
         dumpBatchToBuffer(batch, context, buffer)
         buffer.toString()
     }
 
     @Override
-    String dumpBeforeStage(@Nonnull String stageName, @Nullable List<?> batch, @Nullable Object context) {
+    String dumpBeforeStage(@Nonnull String stageName, @Nullable List<?> batch, @Nullable C context) {
         StringBuilder buffer = makeBufferForBatch(batch)
         buffer << stageName << ' <- '
         dumpBatchToBuffer(batch, context, buffer)
@@ -102,7 +105,7 @@ class FormattingToStringDumper implements BatchDumper<Object, Object>, StageDump
     }
 
     @Override
-    String dumpAfterStage(@Nonnull String stageName, @Nullable List<?> batch, @Nullable Object context) {
+    String dumpAfterStage(@Nonnull String stageName, @Nullable List<?> batch, @Nullable C context) {
         StringBuilder buffer = makeBufferForBatch(batch)
         buffer << stageName << ' -> '
         dumpBatchToBuffer(batch, context, buffer)

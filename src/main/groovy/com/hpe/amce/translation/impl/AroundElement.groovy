@@ -7,6 +7,8 @@ import javax.annotation.Nullable
  * Defines what to do for each element of a batch.
  *
  * C - type of translation context.
+ *
+ * @see AroundElement#translateElement
  */
 interface AroundElement<C> {
     /**
@@ -16,7 +18,7 @@ interface AroundElement<C> {
      * @param element Element to be translated. Can be null if null was passed.
      * @param context Translation context or null if not specified.
      * @return Result of translating specified element using specified stage.
-     * See {@link DecorableStagedBatchTranslator#processingStages}.
+     * See {@link StagesCaller#processingStages}.
      */
     @Nonnull
     List<?> translateElement(@Nonnull String stageName,
