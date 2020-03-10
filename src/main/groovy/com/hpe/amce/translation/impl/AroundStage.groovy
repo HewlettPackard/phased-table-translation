@@ -5,6 +5,8 @@ import javax.annotation.Nullable
 
 /**
  * Defines what to do for each translation stage.
+ *
+ * @see AroundStage#applyStage
  */
 interface AroundStage<C> {
     /**

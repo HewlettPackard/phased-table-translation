@@ -7,6 +7,8 @@ import javax.annotation.Nullable
  * Defines what to do for each element of a batch.
  *
  * C - type of translation context.
+ *
+ * @see AroundElement#translateElement
  */
 interface AroundElement<C> {
     /**
