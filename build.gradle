@@ -1,8 +1,9 @@
 plugins {
     id 'groovy'
     id 'maven-publish'
-    id "ru.vyarus.quality" version "4.0.0"
-    id "com.github.ben-manes.versions" version "0.27.0"
+    id "ru.vyarus.quality" version "4.1.0"
+    id "com.github.ben-manes.versions" version "0.28.0"
+    id "name.remal.check-updates" version "1.0.177"
 }
 
 description = "A library that facilitates translation from one data format to another. Handles batches of messages and fields of objects."
