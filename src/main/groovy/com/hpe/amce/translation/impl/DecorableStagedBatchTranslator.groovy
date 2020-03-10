@@ -31,45 +31,12 @@ import javax.annotation.Nullable
 class DecorableStagedBatchTranslator<O, R, C> implements BatchTranslator<O, R, C> {
 
     /**
-     * Processing stages.
-     * <br/>
-     * Keys are stage names and entries are closures that do the processing.
-     * <br/>
-     * The closures should take two parameters.
-     * Where first parameter is a single event being processed.
-     * Its type should be a type of raw event for the first stage.
-     * For the second and further stages, its type should be the same
-     * as output of previous stage. For example, if previous stage
-     * is just a filter on raw events then for the current stage,
-     * the first parameter should also be of raw event type.
-     * Second parameter has type C and represents context (extra parameters) passed to
-     * {@link #translateBatch}.
-     * <br/>
-     * The closure should return list of processed events (zero if filtered out,
-     * exactly one for one-to-one translation, more than one if any extra
-     * events are to be injected).
-     * <br/>
-     * Stages are called in whatever order map iterates them so use ordered maps.
+     * Processing stages through which each element should be processed.
+     *
+     * @see StagesCaller#processingStages
      */
     @Nonnull
-    Map<String, Closure<List<?>>> processingStages
-
-    /**
-     * Iterates over {@link DecorableStagedBatchTranslator#processingStages}
-     * and calls {@link DecorableStagedBatchTranslator#aroundStage} for each.
-     *
-     * Each next stage gets input produced by previous stage.
-     */
-    class StagesCaller implements BatchTranslator<O, R, C> {
-        @Override
-        List<R> translateBatch(@Nullable List<O> elements, @Nullable C context) {
-            List<?> result = elements
-            processingStages.each { stageName, stageCode ->
-                result = result != null ? aroundStage.applyStage(stageName, stageCode, result, context) : []
-            }
-            result
-        }
-    }
+    final Map<String, Closure<List<?>>> processingStages
 
     /**
      * Translates a batch.
@@ -79,22 +46,7 @@ class DecorableStagedBatchTranslator<O, R, C> implements BatchTranslator<O, R, C
      * per-batch metrics reporting.
      */
     @Nonnull
-    BatchTranslator<O, R, C> aroundBatch = new StagesCaller()
-
-    /**
-     * Delegates to {@link DecorableStagedBatchTranslator#aroundElement} to actually
-     * process each element.
-     */
-    class ActualStageProcessor implements AroundStage<C> {
-        @Override
-        @Nonnull
-        List<?> applyStage(@Nonnull String stageName,
-                           @Nonnull Closure<List<?>> stageCode, @Nonnull List<?> elements, @Nullable C context) {
-            elements.collectMany { element ->
-                aroundElement.translateElement(stageName, stageCode, element, context) ?: Collections.emptyList()
-            }
-        }
-    }
+    final BatchTranslator<O, R, C> aroundBatch
 
     /**
      * Applies translation stage to a batch of elements.
@@ -104,7 +56,7 @@ class DecorableStagedBatchTranslator<O, R, C> implements BatchTranslator<O, R, C
      * per-stage metrics reporting.
      */
     @Nonnull
-    AroundStage<C> aroundStage = new ActualStageProcessor()
+    final AroundStage<C> aroundStage
 
     /**
      * Applies translation to each element.
@@ -115,7 +67,43 @@ class DecorableStagedBatchTranslator<O, R, C> implements BatchTranslator<O, R, C
      * to log or metrics.
      */
     @Nonnull
-    AroundElement<C> aroundElement = new ElementErrorSuppressorDecorator<C>(new StageCaller<C>())
+    final AroundElement<C> aroundElement
+
+    /**
+     * Creates an instance.
+     * @param processingStages Stages that define processing of elements.
+     * @see #processingStages
+     * @see #aroundBatch
+     * @see #aroundStage
+     * @see #aroundElement
+     */
+    DecorableStagedBatchTranslator(@Nonnull Map<String, Closure<List<?>>> processingStages) {
+        this.processingStages = processingStages
+        aroundElement = new ElementErrorSuppressorDecorator<C>(new StageCaller<C>())
+        aroundStage = new ActualStageProcessor<>(aroundElement)
+        aroundBatch = new StagesCaller<>(processingStages, aroundStage)
+    }
+
+    /**
+     * Creates an instance.
+     * @param processingStages Stages that define processing of elements.
+     * @param aroundBatch Defines how to process a batch of elements.
+     * @param aroundStage Defines how to run processing of each stage.
+     * @param aroundElement Defines how to run processing of each element of a batch.
+     * @see #processingStages
+     * @see #aroundBatch
+     * @see #aroundStage
+     * @see #aroundElement
+     */
+    DecorableStagedBatchTranslator(@Nonnull Map<String, Closure<List<?>>> processingStages,
+                                   @Nonnull BatchTranslator<O, R, C> aroundBatch,
+                                   @Nonnull AroundStage<C> aroundStage,
+                                   @Nonnull AroundElement<C> aroundElement) {
+        this.processingStages = processingStages
+        this.aroundBatch = aroundBatch
+        this.aroundStage = aroundStage
+        this.aroundElement = aroundElement
+    }
 
     @Override
     List<R> translateBatch(@Nullable List<O> elements, @Nullable C context) {
