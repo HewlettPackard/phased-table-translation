@@ -13,9 +13,9 @@ import javax.annotation.Nullable
 interface BatchTranslator<O, R, C> {
     /**
      * Translates a batch of elements.
-     * @param elements Elements to translate.
-     * @param context Translation context.
-     * @return Translated elements.
+     * @param elements Elements to translate or empty list or null if none.
+     * @param context Translation context or null if none.
+     * @return Translated elements or empty list if input was null.
      */
     @Nonnull
     List<R> translateBatch(@Nullable List<O> elements, @Nullable C context)

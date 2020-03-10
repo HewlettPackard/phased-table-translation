@@ -30,7 +30,9 @@ import java.util.concurrent.Callable
  *
  * C - Type of context object.
  *
- * @deprecated Use{@link com.hpe.amce.translation.impl.DecorableStagedBatchTranslator} instead.
+ * @deprecated Use {@link com.hpe.amce.translation.impl.StagesCaller},
+ * {@link com.hpe.amce.translation.impl.ActualStageProcessor}
+ * and {@link com.hpe.amce.translation.impl.StageCaller} with desired decorators instead.
  */
 @Deprecated
 @Log4j2
