@@ -4,6 +4,11 @@ image:https://img.shields.io/github/v/release/HewlettPackard/phased-table-transl
 image:https://img.shields.io/jitpack/v/github/HewlettPackard/phased-table-translation[JitPack]
 image:https://img.shields.io/github/languages/top/HewlettPackard/phased-table-translation[GitHub top language]
 
+:toc:
+:toc-placement!:
+
+toc::[]
+
 == Usage
 
 The library is available via https://jitpack.io/[Jitpack].
@@ -45,3 +50,13 @@ You can also browse on Jitpack:
 See Jitpack https://jitpack.io/docs/[documentation]
 and https://jitpack.io/docs/FAQ/[FAQ] for a list of
 all Jitpack features.
+
+== API
+
+Generally, the library consists of two parts:
+
+* Translating a batch of elements using an implementation of link:src/main/groovy/com/hpe/amce/translation/BatchTranslator.groovy[BatchTranslator]. The idea is to use decorator pattern to finely control how batch is handled including tracing, metrics, "best effort", error logging, etc. See usage example in 
+link:src/test/groovy/com/hpe/amce/translation/impl/OnParWithLegacyTest.groovy#L115[unit test].
+* Mapping fields of an input object to an output object using link:src/main/groovy/com/hpe/amce/mapping/ObjectMapper.groovy[ObjectMapper]. Here, idea is to define mapping as a table where each row defines input or out field and columns specify default value, value validation, value translation, etc. You can see a glimpse of example in the following link:src/test/groovy/com/hpe/amce/mapping/MapperTest.groovy#L468[unit test].
+
+Of course, it is natural to use `BatchTranslator` for a batch handling while applying `ObjectMapper` to individual elements of that batch. However, one works just fine without another too.
