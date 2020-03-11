@@ -152,6 +152,10 @@ publishing {
     }
 }
 
+test {
+    useJUnitPlatform()
+}
+
 plantUml {
     render input: 'src/docs/diagrams/*.puml', output: 'src/docs/diagrams/', format: 'svg', withMetadata: false
 }
