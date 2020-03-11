@@ -62,7 +62,7 @@ link:src/test/groovy/com/hpe/amce/translation/impl/OnParWithLegacyTest.groovy#L1
 Of course, it is natural to use `BatchTranslator` for a batch handling while applying `ObjectMapper` to individual elements of that batch. However, one works just fine without another too.
 
 ifdef::env-github[]
-:imagesdir: https://hewlettpackard.github.io/phased-table-translation/
+:imagesdir: https://hewlettpackard.github.io/phased-table-translation/src/docs/diagrams/
 endif::[]
 ifndef::env-github[]
 :imagesdir: src/docs/diagrams/
