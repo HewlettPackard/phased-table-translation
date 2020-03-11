@@ -8,7 +8,7 @@ image:https://img.shields.io/github/languages/top/HewlettPackard/phased-table-tr
 
 toc::[]
 
-== Usage
+== Declaring dependency
 
 The library is available via https://jitpack.io/[Jitpack].
 
@@ -40,7 +40,9 @@ dependencies {
 }
 ```
 
-You can also browse on Jitpack:
+== Javadoc
+
+You can browse Javadoc on Jitpack:
 
 * https://jitpack.io/com/github/HewlettPackard/phased-table-translation/master-SNAPSHOT/javadoc/[latest snapshot javadoc]
 * https://jitpack.io/com/github/HewlettPackard/phased-table-translation/latest/javadoc/[latest released version javadoc]
@@ -50,7 +52,7 @@ See Jitpack https://jitpack.io/docs/[documentation]
 and https://jitpack.io/docs/FAQ/[FAQ] for a list of
 all Jitpack features.
 
-== API
+== Short summary
 
 Generally, the library consists of two parts:
 
@@ -67,7 +69,9 @@ ifndef::env-github[]
 :imagesdir: src/docs/diagrams/
 endif::[]
 
-== Background ==
+== Long desciption
+
+=== Background
 
 The standard algorithmic approach to data translation and conversion
 involves looping over received records and then constructing
@@ -93,7 +97,7 @@ output records then the standard algorithmic approach often results
 in extremely complex implementation that is very hard to maintain
 due to its complexity.
 
-== Summary ==
+=== Summary
 
 In accordance with phased table-based batch data translation,
 input data processing is represented as a number of phases.
@@ -141,7 +145,7 @@ then this error is recorded in operational journal
 and processing continues on the same phase but for the next
 input record.
 
-== Detailed description ==
+=== Detailed description
 
 Phased table-based batch data translation presents a combination of data packet splitting into records,
 splitting processing into phases, per-record processing resulting in
@@ -541,7 +545,7 @@ The following is a definition of state machine for the optional fields:
 .State machine for optional fields
 image:State-machine-for-optional-fields.svg[]
 
-== Usage ==
+=== Usage
 
 Generally code should match columns in FS. Each row in FS
 represents a single Field object used by a Mapper.
@@ -578,7 +582,7 @@ IDE doesn't report any warnings.
 IMPORTANT: Think twice before suppressing IDE with explicit cast.
 IDE is your friend and reports a potential bug.
 
-=== Handling multiple fields at once ===
+==== Handling multiple fields at once
 
 If you are dealing with composite fields like a Managed Object
 whose value is composed of multiple input fields then the best practice is:
@@ -595,7 +599,7 @@ A setter will set just one output field in most cases. However,
 there is no technical limitation to this and you are able
 to propagate multiple output fields in setter if necessary.
 
-=== Logging ===
+==== Logging
 
 Whenever a defaulter is used upon data error, a warning is printed to
 log with detailed problem description. However, if
@@ -605,7 +609,7 @@ Instead, an exception will contain detailed information and
 whoever has called a Mapper and caught the exception will have to
 print it.
 
-=== Field optionality ===
+==== Field optionality
 
 The difference between mandatory and optional fields:
 
@@ -634,7 +638,7 @@ It's not mandatory then?
 
 |===
 
-=== Formal definition and testing ===
+==== Formal definition and testing
 
 The full definition of what should happen for a
 particular combination of inputs is defined
@@ -661,7 +665,7 @@ specific test cases. This can be used for regression testing and to
 investigate Mapper behavior when you don't want to
 go through full table.
 
-=== Multi threading guarantees and requirements ===
+==== Multi threading guarantees and requirements
 
 Each state machine is static and doesn't have mutable state once constructed.
 Particular configuration of a field, original and resulting object,
