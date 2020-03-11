@@ -1,0 +1,7 @@
+@startuml
+[*] -> getter : Input record
+getter -> validator : Field value\nfrom input\nrecord
+validator -> translator : Field value\nfrom input\nrecord
+translator -> setter : Result field\nvalue
+setter -> [*] : Output record
+@enduml

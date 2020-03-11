@@ -1,0 +1,22 @@
+@startuml
+Field <|-- "Scalar field"
+Field : identification
+"Scalar field" : Scalar value
+Field <|-- "List field"
+"List field" : Scalar[] values
+Field <|-- "Structure field"
+"Structure field" : Structure subFields
+Field <|-- "List of structures field"
+"List of structures field" : Structure[] subFields
+Structure -l-|> Field
+Structure o-l- "1..*" Field
+Structure : Field field1
+Structure : Field field2
+Structure : ...
+Structure : Field fieldN
+note right of Structure
+    Can contain other structures
+    resulting in multi level
+    tree of fields.
+    end note
+@enduml

@@ -60,3 +60,616 @@ link:src/test/groovy/com/hpe/amce/translation/impl/OnParWithLegacyTest.groovy#L1
 * Mapping fields of an input object to an output object using link:src/main/groovy/com/hpe/amce/mapping/ObjectMapper.groovy[ObjectMapper]. Here, idea is to define mapping as a table where each row defines input or out field and columns specify default value, value validation, value translation, etc. You can see a glimpse of example in the following link:src/test/groovy/com/hpe/amce/mapping/MapperTest.groovy#L468[unit test].
 
 Of course, it is natural to use `BatchTranslator` for a batch handling while applying `ObjectMapper` to individual elements of that batch. However, one works just fine without another too.
+
+ifdef::env-github[]
+:imagesdir: https://hewlettpackard.github.io/phased-table-translation/
+endif::[]
+ifndef::env-github[]
+:imagesdir: src/docs/diagrams/
+endif::[]
+
+== Background ==
+
+The standard algorithmic approach to data translation and conversion
+involves looping over received records and then constructing
+records in target system data format using logical branches that
+test for the presence of fields or specific values of fields in input
+data record to determine if output filed should be added and what
+should be the value of this field.
+
+The standard approach presents the following problems:
+
+* Missing input field or a mismatch between expected and actual
+format of input field often results in a processing error that
+causes loss of the whole batch of records.
+* Complexity of translation procedure is a product of a number of
+input and output fields. When number of either input or output fields
+is substantial, this complexity and a lack of modularity make it
+extremely difficult to implement the translation and even more
+difficult to prove correctness of this implementation.
+* When input records that match a certain condition have to be
+omitted from result (filtered out) or a single input record
+matching a specific condition should result in multiple
+output records then the standard algorithmic approach often results
+in extremely complex implementation that is very hard to maintain
+due to its complexity.
+
+== Summary ==
+
+In accordance with phased table-based batch data translation,
+input data processing is represented as a number of phases.
+Each phase has an input consisting of zero or more input records.
+A result of processing an input at a particular phase determines
+output of this phase. The phases are ordered and chained together.
+The first phase receives data from the source system as an input.
+The second phase receives output of the first phase as an input.
+The third phase receives output of the second phase as an input and so
+on. An output of the last phase is sent to the target telecommunications
+system.
+
+Each phase iterates over input records to perform per-record processing.
+The output of each of these iterations for a particular record
+is a set of output records. Each input record could result in
+zero, one or many output records. All output records from all
+iterations are aggregated into output of this particular phase.
+
+The phases generally have three types:
+
+. Filters conditionally remove input records
+. Transformers conditionally transform input record into output record
+. Injectors conditionally add additional output records
+
+A transformer is defined by one or more ordered tables that contain definition of
+how to process input record and construct output record.
+Each record in translation table has the following columns:
+
+. Indication of optionality
+. Input data extraction
+. Default value
+. Data validation
+. Data translation
+. Output data injection
+
+Each column is defined in terms of input and output record.
+When an input record is translated, processing defined by each
+table row is applied to it in order defined by order of rows in a table.
+A result of application of all translation table rows to an input record
+becomes an output record.
+
+Between each iteration over input records each phase checks for any errors
+that have occurred. If processing of an input record has resulted in an error
+then this error is recorded in operational journal
+and processing continues on the same phase but for the next
+input record.
+
+== Detailed description ==
+
+Phased table-based batch data translation presents a combination of data packet splitting into records,
+splitting processing into phases, per-record processing resulting in
+varying number of output records, table based translation definition
+and final records aggregation.
+
+.Combining phased processing, per-record processing and output record aggregation
+image:Combining-phased-processing.svg[]
+
+An input data packet received from source telecommunications system and output data
+packet that should be sent to target telecommunications system are split
+into individual records (for example, events, faults, alarms, incidents and so on).
+Input and output data packets could consist of zero, one or many records.
+
+.Splitting data into records
+image:Splitting-data-into-records.svg[]
+
+Processing of input data to prepare output data is split into phases. The phases are
+chained together so the output of a previous phase becomes an input of the next
+phase.
+
+.Ordered chaining of phases
+image:Ordered-chaining-of-phases.svg[]
+
+A phase could produce as its output a set with a different number of records compared to its
+input. Depending on a number of records in output set, a phase could implement one
+of the three functions:
+
+. Filter - output has fewer records than input;
+. Transformer - output has the same number of records as input;
+. Injector - output has more records than input.
+
+Each type of phase iterates over input set of records in their respective order. For each input record,
+a phase generates zero, one or many output records based on a criteria.
+
+This criteria is defined for each phase. The definition of the criteria uses one or more
+of the following:
+
+. Tests characteristics of individual input record;
+. Evaluates condition based on aggregated characteristic prepared by one of the previous phases;
+. Evaluates condition based on general environment characteristics;
+. Aggregated characteristics calculated by a previous stage;
+. Output field value calculated by a previous mapping table row.
+
+Result of processing each input record
+is added to the end of phase's output. Combined set of output records returned as phase's result.
+
+.Per-record processing inside a phase
+image:Per-record-processing-inside-a-phase.svg[]
+
+A filter is used to remove from input certain records based on a defined criteria.
+On each iteration a filter returns either empty set or a set consisting of single element - original
+input record.
+
+A transformer is used to convert between input and output data formats and
+optionally to calculate aggregated characteristics that can be used
+by later stages. On each iteration a transformer returns a set consisting of single element.
+Based on a defined criteria, this could be original input record or a new record that is
+result of translating input record.
+
+An injector is used to add additional output records based on a defined criteria.
+On each iteration an injector returns either a set consisting of original input record
+or a set that contains original input record and one or more additional records.
+Those additional records differ from input record and can be either of the following:
+
+. Modified original input record flagged to be translated by later stages in a way
+different compared to original input record;
+. Final resulting record in a format of a target telecommunications system and not
+requiring further modifications. In this case, injector uses the same table based approach
+to translate input record into output record.
+
+.Types of phases
+image:Types-of-phases.svg[]
+
+For the means of criteria evaluation on a per-input record basis
+and for the means of constructing new translated records from
+input records, both input records and output records
+are assumed to be consisting of fields.
+The fields of input records and output records are not required to match
+and are not required to form a flat structure where every field has
+a scalar value and is placed on the same level as other fields.
+On a contrary, the proposed approach embraces diversity in a number, types and
+structure of input and output fields.
+
+The value of a field can be any of the following:
+
+. Scalar value
+. List of scalar values
+. A structure consisting of other fields or lists of fields
+. A list of structures consisting of other fields or lists of fields
+
+.Variations of fields complexity
+image:Variations-of-fields-complexity.svg[]
+
+Transformer uses table based definition of how input record should
+be mapped to output record. Definition of this mapping table has the following columns:
+
+. Indication of optionality
+. Input data extraction (further referred as getter)
+. Default value (further referred as defaulter)
+. Data validation (further referred as validator)
+. Data translation (further referred as translator)
+. Output data injection (further referred as setter)
+
+A transformer can use one or many mapping tables. A defined criteria
+is used to determine if for a particular input record a mapping table should be used
+to produce new translated output record or original input record should be used
+unaltered as output record and (if multiple mapping tables are defined) which
+of the defined mapping tables should be used. A mapping table can have one or many rows.
+
+.Relationship between transformer and mapping table
+image:Relationship-between-transformer-and-mapping-table.svg[]
+
+To create a new translated record from an input record, transformer
+iterates over all rows in selected mapping table in the order these rows
+are defined. For each row, transformer performs a series of steps defined
+by columns values for this row.
+
+.Using rows of mapping table in transformer
+image:Using-rows-of-mapping-table-in-transformer.svg[]
+
+Getter extracts field value (which could be a structure or list
+of structures) from an input record and returns it.
+
+Defaulter returns a value to be used as output field value in any of the following cases:
+
+. Input record does not have an input field referred to by the current mapping table row;
+. An input field, referred by the current mapping table row, does not have a value in
+input record;
+. A value of input field extracted from input record does not conform to the defined requirements
+as specified in data validation column of the mapping table row;
+. An error happens during input field value extraction, validation or translation.
+
+Validator checks if field value extracted from an input record
+matches defined requirements for the field:
+
+. Format;
+. Range;
+. Inclusion or exclusion from a defined set of allowed or disallowed values.
+
+Translator calculates output field value using any or all of the following:
+
+. Input field value;
+. Configuration parameters;
+. Operational environment characteristics;
+. Aggregated characteristics calculated by earlier phases.
+
+Setter injects output field value into a partial output record on which phase currently operates on.
+
+.Mapping table row
+image:Mapping-table-row.svg[]
+
+The actual behavior for a particular row depends on the actual combination
+of column values. Column values are optional (except for indication of optionality).
+
+In the simplest case, transformer performs the following steps:
+
+. Extracts a field from input record by calling getter
+. Validates field value by calling validator
+. Translates field value by calling translator
+. Injects field into output record by calling setter
+
+.Simple case of mapping table row processing
+image:Simple-case-of-mapping-table-row-processing.svg[]
+
+Further, transformer is enhanced to account for an input field value being absent,
+error happening in getter, translator or setter. In addition to a normal case
+when every row of mapping table is applied to an input record and resulting new
+translated record is returned from transformer, two additional outcomes are added:
+
+. code error - indicates problem with mapping table definition;
+. data error - indicates problem with input data.
+
+.Data error and code error detection in transformer
+image:Data-error-and-code-error.svg[]
+
+When either code error or data error is detected:
+
+. transformer stops iterating over rows of a mapping table;
+. an error is recorded in operational journal;
+. resulting record is not added to the set of output records,
+instead phase continues processing with the next input record.
+
+If a defaulter is defined for a particular row of a mapping table
+then this defaulter is used when
+there is a problem with input data as detected for data error.
+When defaulter is called then the value it returns is used instead of
+translating input field value. If defaulter evaluates successfully then
+processing of mapping table row and input record is not interrupted
+and continues further.
+
+Whenever a defaulter is used upon data error, a warning message is
+recorded in operational journal
+with detailed problem description.
+
+.Usage of defaulter in transformer
+image:Usage-of-defaulter-in-transformer.svg[]
+
+A single or multiple but not all columns in a mapping table for a particular
+row could be empty. Processing of input record differs based on
+which columns are defined for a particular row in a mapping table.
+This allows implementation of different functions using the same form of
+translation definition and the same implementation of base
+algorithm that applies processing defined by a mapping table row
+to an input record.
+
+If translator is not defined for a particular row in a mapping table
+then it is assumed that
+input value should be propagated to output unaltered
+(could also be optionally checked by validator before pushing to output).
+
+.Propagating field value from input record to output record unaltered
+image:Propagating-field-value.svg[]
+
+Getter not defined for a particular row of a mapping table
+can be used to set output field to a pre-defined value.
+In this mode neither validator nor translator have a chance to be used
+so it is a code error to try to specify them.
+
+.Setting a field in output record to a pre-defined value
+image:Setting-a-field-in-output.svg[]
+
+Setter undefined for a particular row of a mapping table
+could be used to
+verify input data: if input field is absent or has invalid
+value then either error or warning operational journal record is generated
+based on field optionality flag.
+Since nothing is propagated to output record, it is useless and so
+invalid to set defaulter or translator in this mode (code error).
+
+.Validating input data
+image:Validating-input-data.svg[]
+
+Based on field optionality flag, transformer reacts differently when
+a value for a field is absent in an input record:
+
+. For optional field,
+do not consider this as a problem with input data but try to use defaulter,
+skip mapping table row if defaulter is not defined;
+. For mandatory field,
+consider this as a problem with input data,
+record a warning message in operational journal if defaulter is defined
+or throw data error if it is not defined.
+
+Based on field optionality flag, transformer reacts differently when
+defaulter is not defined for a particular mapping table row
+and a data error is detected for input record:
+
+. For optional field,
+record a warning message in operational journal, skip further processing
+of the current mapping table row and continue with the next one;
+. For mandatory field,
+consider this to be a data error, record the reason in operational journal
+and continue processing with the next input record.
+
+Based on field optionality flag, transformer reacts differently when
+defaulter returns an undefined value:
+
+. For optional field,
+do not consider this situation to be an error,
+continue processing with the next mapping table row;
+. For mandatory field,
+consider this situation to be a code error related to
+definition of a mapping table (undefined value is
+not an appropriate default value for a mandatory field).
+
+Based on field optionality flag, transformer reacts differently when
+translator returns an undefined value:
+
+. For optional field,
+do not consider this situation to be an error,
+continue processing with the next mapping table row;
+. For mandatory field,
+consider this situation to be a code error related to
+definition of a mapping table (undefined value is
+not an appropriate translated value for a mandatory field).
+
+Between each iteration over input records each phase checks for any errors
+that have occurred. If processing of an input record has resulted in an error
+then this error is recorded in operational journal
+and processing continues on the same phase but for the next
+input record.
+
+To process an input record according to a mapping table row,
+transformer advances from one column to the next in a particular row.
+To determine to which column to perform transition and to perform the work
+defined by a column value, transformer defines two state machines:
+
+. For mandatory fields;
+. For optional fields.
+
+The current condition of a state machine is stored in a context.
+The context is created when an input record is beginning
+to be processed according to a particular row in a mapping table.
+Once this processing is finished, the context is not longer needed
+and is either disposed or reused for the next row by rewriting the
+data it has previously contained. The context holds the following:
+
+. Input record;
+. Partial output record;
+. Current field value;
+. Current encountered error;
+. Additional global parameters.
+
+State machines for mandatory and optional fields
+are defined in terms of the following states:
+
+. Getter
+. Defaulter
+. Validator
+. Translator
+. Setter
+. End
+. Warning
+. Warning if defined or data error if undefined
+. Code error
+
+Each type of state has an action associated with it. This action
+is executed when state machine enters the state.
+The action receives the context as an input and can alter this context.
+
+Each state has four options that differ for optional and for
+mandatory fields. These options define into which next state the
+state machine should transition based on current conditions after
+the action is executed.
+These options are the following:
+
+. Transition in case of an error (further referred to as onError);
+. Transition in case of current state being evaluated to
+undefined value (further referred to as onNull);
+. Transition in case current state evaluates to a defined value
+(further referred to as onNonNull);
+. Transition in case current state is undefined for
+a current row in a mapping table
+(further referred to as onUndefined).
+
+.State of a state machine used to process input record according to row of a mapping table
+image:State-of-a-state-machine.svg[]
+
+.State transitions to other states based on current conditions
+image:State-transitions.svg[]
+
+Getter reads input field value as defined by the row in a mapping table
+using input record in the context and writes this value into
+current field value of the context. After this getter transitions
+to the next state based on current conditions.
+
+Defaulter calculates value as defined by the row in a mapping table
+as writes this value into current field value of the context.
+After this defaulter transitions
+to the next state based on current conditions.
+
+Validator reads current field value of the context, checks this
+value as defined by the row in a mapping table but does not
+alter the context.
+After this validator transitions
+to the next state based on current conditions.
+
+Translator reads current field value of the context, calculates
+new value as defined by the row of a mapping table and writes this
+value back into current field value of the context.
+After this translator transitions
+to the next state based on current conditions.
+
+Setter reads current field value of the context and
+writes this value to partial output record of the context
+as defined by the row of a mapping table.
+After this setter transitions
+to the next state based on current conditions.
+
+End reads partial output record of the context and returns
+it as result for the current row of a mapping table without
+transitioning to other states.
+
+Warning state records a warning message in operational
+journal and delegates to whatever other state it wraps.
+
+State "Warning if defined or data error if undefined"
+checks if current column value is defined for the row in a mapping table.
+If it is defined then a warning message is recorded in
+operational journal and further processing is delegated to
+the other state it wraps. If the column value is not
+defined then error is raised and further processing
+of this mapping table row is interrupted.
+
+State "Code error" interrupts further processing of
+a mapping table row for the current input record and
+raises error.
+
+The following is a definition of state machine for the mandatory fields:
+
+.State machine for mandatory fields
+image:State-machine-for-mandatory-fields.svg[]
+
+The following is a definition of state machine for the optional fields:
+
+.State machine for optional fields
+image:State-machine-for-optional-fields.svg[]
+
+== Usage ==
+
+Generally code should match columns in FS. Each row in FS
+represents a single Field object used by a Mapper.
+The Field object carries these 6 settings that Mapper reads
+to execute a single FS row.
+To have full FS table covered multiple Field objects are to
+be injected into Mapper. Generally, what's written in FS
+translation table is directly translated into Mapper
+configuration table.
+
+Each Field object is configured with closures and can be represented
+as the following:
+
+image:Field.svg[]
+
+The actual types are generic class type parameters that you
+specify in configuration:
+
+* OriginalObjectType is OO
+* ResultObjectType is RO
+* OriginalFieldType is OF
+* ResultFieldType is RF
+
+If you have specified correct types then IDE will verify
+and warn you if your code mismatches the types. For example,
+if you specified that original field type (OF) is List and
+try to perform List operations on it in translator but
+in reality your getter returns a String then IDE
+will highlight the code and show a warning that code is malformed.
+
+IMPORTANT: Make sure you correctly specify the types and make sure
+IDE doesn't report any warnings.
+
+IMPORTANT: Think twice before suppressing IDE with explicit cast.
+IDE is your friend and reports a potential bug.
+
+=== Handling multiple fields at once ===
+
+If you are dealing with composite fields like a Managed Object
+whose value is composed of multiple input fields then the best practice is:
+
+* define a static nested canonical POGO with fields matching input fields
+used for translation
+* specify this POGO as type of input field
+* return an instance of this POGO from getter and defaulter
+* expect this POGO as input parameter of validator, translator and setter
+
+image:Composite.svg[]
+
+A setter will set just one output field in most cases. However,
+there is no technical limitation to this and you are able
+to propagate multiple output fields in setter if necessary.
+
+=== Logging ===
+
+Whenever a defaulter is used upon data error, a warning is printed to
+log with detailed problem description. However, if
+data error is thrown as exception (like when there is no defaulter
+for a mandatory field) then nothing is logged by Mapper.
+Instead, an exception will contain detailed information and
+whoever has called a Mapper and caught the exception will have to
+print it.
+
+=== Field optionality ===
+
+The difference between mandatory and optional fields:
+
+|===
+|What|Optional|Mandatory
+
+|Input field absent
+|Not a problem with input data but try to use defaulter,
+just skip the field if none is configured
+|Problem with input data: log a warning if have defaulter
+or throw data error if not
+
+|No defaulter and a problem with input data
+|Log a warning, skip the field
+|Throw data error exception
+
+|Defaulter returns null
+|Nothing special, going through usual chain
+|Code error: why default value for a mandatory field is null?
+It's not mandatory then?
+
+|Translator returns null
+|Nothing special, going through usual chain
+|Code error: why resulting value for a mandatory field is null?
+It's not mandatory then?
+
+|===
+
+=== Formal definition and testing ===
+
+The full definition of what should happen for a
+particular combination of inputs is defined
+by MapperTestData.groovy. It contains
+desired output and desired logging for each possible combination.
+Desired outputs are:
+
+* original value was propagated
+* translated value was propagated
+* default value was propagated
+* nothing was propagated (field skipped)
+* data error exception was thrown
+* code error exception was thrown
+
+Desired logging is either:
+
+* none
+* warning message
+
+The table itself is generated by MapperTest.groovy. And can
+be reviewed and if necessary adjusted by changing MapperTest.groovy.
+MapperTest.groovy also contains a test for "manual" checking of
+specific test cases. This can be used for regression testing and to
+investigate Mapper behavior when you don't want to
+go through full table.
+
+=== Multi threading guarantees and requirements ===
+
+Each state machine is static and doesn't have mutable state once constructed.
+Particular configuration of a field, original and resulting object,
+intermediate data like current value and current exception are
+transferred around as method parameters. This means, it is safe
+to use Mapper in multithreaded environment even for the same
+Field objects. However, since Ctx object holding resulting
+object is used by multiple fields, it is undesired to try to
+translate multiple fields of the same object in parallel.
+However, trying to translate different objects in parallel should be ok.

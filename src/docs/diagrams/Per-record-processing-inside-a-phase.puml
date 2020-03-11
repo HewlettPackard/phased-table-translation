@@ -1,0 +1,11 @@
+@startuml
+start
+-> A set of zero, one or many input records;
+while (For each input record)
+    :Evaluate criteria;
+    :Produce zero, one or many output records;
+endwhile
+:Aggregate output records from all records into a single output set;
+-> A set of zero, one or many input records;
+stop
+@enduml

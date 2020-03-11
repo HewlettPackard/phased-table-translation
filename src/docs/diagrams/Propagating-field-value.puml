@@ -1,0 +1,5 @@
+@startuml
+[*] -> getter
+getter -> setter
+setter -> [*]
+@enduml

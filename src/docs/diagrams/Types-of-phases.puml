@@ -1,0 +1,28 @@
+@startuml
+Phase *-r- Criteria : evaluates\n per record
+Phase *-d- Action : calls\n per record
+note right of Action
+    Produces zero, one or many of
+    original or modified input record
+    or new translated record
+    from an input record
+    end note
+Filter -u-|> Action
+note bottom of Filter
+    Either empty set or
+    set with original input record
+    end note
+Transformer -u-|> Action
+note bottom of Transformer
+    Either set of original input record
+    or set of one new translated record
+    end note
+Injector -u-|> Action
+note bottom of Injector
+    Either set of original input record or
+    set of original input record and modified input record(s) or
+    new translated record(s)
+    end note
+Phase -u-> "Output set of records" : produces
+Phase -u-> "Input set of records" : iterates over
+@enduml

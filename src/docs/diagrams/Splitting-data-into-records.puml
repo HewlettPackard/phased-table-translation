@@ -1,0 +1,9 @@
+@startuml
+Event -u-|> Record
+Fault -u-|> Record
+Alarm -u-|> Record
+Incident -u-|> Record
+"Data packet" o-- "0..*" Record : contains
+"Input data packet" --|> "Data packet"
+"Output data packet" --|> "Data packet"
+@enduml

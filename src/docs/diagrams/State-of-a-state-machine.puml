@@ -1,0 +1,23 @@
+@startuml
+Transformer *-r- "State machine"
+"State machine" o-r- "1" State : starts with
+class State {
+    State onError
+    State onNull
+    State onNonNull
+    State onUndefined
+    action(Contex)
+}
+State o-- "4" State : transitions to
+Transformer --> Context : creates
+State --> Context : reads and alters
+class Context {
+    Input record
+    Partial output record
+    Current field value
+    Current encountered error
+    Additional global parameters
+}
+class "Mapping table"
+State --> "Mapping table" : reads action definition
+@enduml

@@ -1,0 +1,7 @@
+@startuml
+(*) --> Current state
+"Current state" --> [action resulted\nin an error] onError
+"Current state" --> [action returns\nundefined value] onNull
+"Current state" --> [action returns\na defined value] onNonNull
+"Current state" --> [column contains\nno value for the\nrow in the mapping\ntable] onUndefined
+@enduml

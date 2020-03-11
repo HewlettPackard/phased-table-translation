@@ -1,0 +1,12 @@
+@startuml
+start
+:Split input data packet into records;
+while (For each phase)
+    while (For each input record)
+        :Generate zero, one or many output records;
+    endwhile
+    :Aggregate output records;
+endwhile
+:Aggregate output data packet;
+stop
+@enduml

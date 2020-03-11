@@ -1,0 +1,13 @@
+@startuml
+start
+-> Input record;
+:Create empty output record;
+-> Input record and empty output record;
+while (For each row in mapping table)
+    -> Input record and\npartial output record;
+    :Perform steps defined by mapping table row;
+    -> Input record and\npartial output record;
+endwhile
+: Return output record;
+stop
+@enduml

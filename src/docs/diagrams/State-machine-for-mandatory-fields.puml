@@ -1,0 +1,37 @@
+@startuml
+
+(*) --> Getter
+
+Getter --> [onNonNull] Validator
+Getter --> [onNull] "Warning if defined or data error if undefined"
+Getter --> [onError] "Warning if defined or data error if undefined"
+Getter --> [onUndefined] Defaulter
+
+Validator --> [onNonNull] Translator
+Validator --> [onNull] "Warning if defined or data error if undefined"
+Validator --> [onError] "Warning if defined or data error if undefined"
+Validator --> [onUndefined] Translator
+
+Translator --> [onNonNull] Setter
+Translator --> [onNull] "Code error"
+Translator --> [onError] "Warning if defined or data error if undefined"
+Translator --> [onUndefined] Setter
+
+Defaulter --> [onNonNull] Setter
+Defaulter --> [onNull] "Code error"
+Defaulter --> [onError] "Code error"
+Defaulter --> [onUndefined] "Code error"
+
+Setter --> [onNonNull] End
+Setter --> [onNull] End
+Setter --> [onError] "Code error"
+Setter --> [onUndefined] End
+
+"Code error" --> (*)
+
+"Warning if defined or data error if undefined" --> [defined] Defaulter
+"Warning if defined or data error if undefined" --> [not defined] (*)
+
+End --> (*)
+
+@enduml

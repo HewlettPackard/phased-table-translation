@@ -1,0 +1,16 @@
+@startuml
+[*] -> getter
+getter -> validator
+validator -> translator
+translator -d-> setter
+setter -> [*]
+setter --> codeerror : Error
+getter --> defaulter : Error
+getter --> defaulter : Missing input\nfield value
+validator -d-> defaulter : Error
+validator -d-> defaulter : Invalid value
+translator -d-> defaulter : Error
+defaulter -r-> setter : No error
+defaulter -d-> codeerror : Error
+codeerror -> [*]
+@enduml

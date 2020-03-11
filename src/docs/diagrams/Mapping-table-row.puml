@@ -1,0 +1,29 @@
+@startuml
+"Mapping table" *-d- "1..*" Row : consists of
+Row : Field optionality flag
+Row *-d- "0..1" Getter : defines
+note bottom of Getter
+    Extracts value of input
+    field from input record.
+    end note
+Row *-d- "0..1" Defaulter : defines
+note bottom of Defaulter
+    Provides default value
+    for output field.
+    end note
+Row *-d- "0..1" Validator : defines
+note bottom of Validator
+    Checks input field
+    value for correctness.
+    end note
+Row *-d- "0..1" Translator : defines
+note bottom of Translator
+    Calculates output
+    field value.
+    end note
+Row *-d- "0..1" Setter : defines
+note bottom of Setter
+    Injects output field
+    value into output record.
+    end note
+@enduml

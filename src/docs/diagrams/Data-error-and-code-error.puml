@@ -1,0 +1,15 @@
+@startuml
+[*] -> getter
+getter -> validator : Field value\npresent in\ninput record
+validator -> translator : Field value\nis correct
+translator -> setter : No error
+setter -> [*] : No error
+setter -d-> codeerror : Error
+getter -d-> dataerror : Error
+getter -d-> dataerror : Missing input\nfield value
+validator -d-> dataerror : Error
+validator -d-> dataerror : Invalid value
+translator -d-> dataerror : Error
+dataerror -> [*]
+codeerror -l-> [*]
+@enduml

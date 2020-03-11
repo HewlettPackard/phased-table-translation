@@ -1,0 +1,21 @@
+@startuml
+Transformer *-- "0..1" Criteria : evaluates per record
+note left of Criteria
+    If defined, determines if input record should be copied
+    to output unaltered or if a mapping table should be
+    used to construct new translated record.
+
+    If multiple mapping tables are defined, determines
+    which mapping table to use.
+    end note
+Transformer *-- "1..*" "Mapping table" : uses
+"Mapping table" *-- "1..*" Row : consists of
+class Row {
+    Field optionality flag
+    Field getter
+    Field defaulter
+    Field validator
+    Field translator
+    Field setter
+}
+@enduml

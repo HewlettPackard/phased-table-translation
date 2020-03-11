@@ -1,0 +1,15 @@
+@startuml
+start
+-> Data packet from source system;
+:First phase;
+-> Set of records;
+:Second phase;
+-> Set of records;
+:Third phase;
+-> Set of records;
+:...;
+-> Set of records;
+:Last phase;
+-> Output data packet for target system;
+stop
+@enduml

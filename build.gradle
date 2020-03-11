@@ -4,6 +4,7 @@ plugins {
     id "ru.vyarus.quality" version "4.1.0"
     id "com.github.ben-manes.versions" version "0.28.0"
     id "name.remal.check-updates" version "1.0.177"
+    id "com.cosminpolifronie.gradle.plantuml" version "1.6.0"
 }
 
 description = "A library that facilitates translation from one data format to another. Handles batches of messages and fields of objects."
@@ -14,14 +15,14 @@ repositories {
     jcenter()
 }
 
-configurations.configureEach {
-    it.resolutionStrategy {
-        eachDependency { DependencyResolveDetails details ->
-            if (details.requested.group == 'org.codehaus.groovy') {
-                details.useVersion "3.0.2"
+configurations.configureEach { configuration ->
+    configuration.resolutionStrategy({ strategy ->
+        strategy.eachDependency { DependencyResolveDetails dependency ->
+            if (dependency.requested.group == 'org.codehaus.groovy') {
+                dependency.useVersion "3.0.2"
             }
         }
-    }
+    } as Action)
 }
 
 dependencies {
@@ -149,6 +150,14 @@ publishing {
             }
         }
     }
+}
+
+plantUml {
+    render input: 'src/docs/diagrams/*.puml', output: 'src/docs/diagrams/', format: 'svg', withMetadata: false
+}
+
+tasks.named('build').configure { build ->
+    build.dependsOn tasks.named("plantUml")
 }
 
 defaultTasks = [publishToMavenLocal.name]

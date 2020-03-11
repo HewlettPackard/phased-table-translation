@@ -1,0 +1,36 @@
+@startuml
+
+(*) --> Getter
+
+Getter --> [onNonNull] Validator
+Getter --> [onNull] Defaulter
+Getter --> [onError] Warning
+Getter --> [onUndefined] Defaulter
+
+Validator --> [onNonNull] Translator
+Validator --> [onNull] Warning
+Validator --> [onError] Warning
+Validator --> [onUndefined] Translator
+
+Translator --> [onNonNull] Setter
+Translator --> [onNull] Setter
+Translator --> [onError] Warning
+Translator --> [onUndefined] Setter
+
+Defaulter --> [onNonNull] Setter
+Defaulter --> [onNull] "Code error"
+Defaulter --> [onError] "Code error"
+Defaulter --> [onUndefined] End
+
+Setter --> [onNonNull] End
+Setter --> [onNull] End
+Setter --> [onError] "Code error"
+Setter --> [onUndefined] End
+
+"Code error" --> (*)
+
+Warning --> [always] Defaulter
+
+End --> (*)
+
+@enduml

@@ -1,0 +1,10 @@
+@startuml
+class Field {
+    boolean mandatory
+    OriginalFieldType getter(OriginalObjectType inputAlarm)
+    OriginalFieldType defaulter()
+    boolean validator(OriginalFieldType inputValue)
+    ResultFieldType translator(OriginalFieldType inputValue)
+    void setter(ResultFieldType resultValue)
+}
+@enduml

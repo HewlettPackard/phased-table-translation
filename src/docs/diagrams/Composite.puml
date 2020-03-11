@@ -1,0 +1,15 @@
+@startuml
+class MoComponents {
+    String manager
+    String node
+    String card
+}
+class Field {
+    MoComponents getter(Object originalAlarm)
+    MoComponents defaulter()
+    boolean validator(MoComponents)
+    String translator(MoComponents)
+    void setter(String)
+}
+Field .> MoComponents
+@enduml
