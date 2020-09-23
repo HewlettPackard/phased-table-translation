@@ -53,7 +53,7 @@ class AbstractStateMachineFieldMapperTest extends Specification {
         when:
         mapper.mapField(field, mappingContext)
         then:
-        1 * mapper.stateMachine >> stateMachine
+        1 * mapper.getStateMachine(field) >> stateMachine
         1 * stateMachine.process(field, mappingContext, !null)
     }
 
@@ -65,7 +65,7 @@ class AbstractStateMachineFieldMapperTest extends Specification {
         when:
         mapper.mapField(field, mappingContext)
         then:
-        1 * mapper.stateMachine >> stateMachine
+        1 * mapper.getStateMachine(field) >> stateMachine
         1 * stateMachine.process(field, mappingContext, !null)
     }
 
@@ -77,7 +77,7 @@ class AbstractStateMachineFieldMapperTest extends Specification {
         when:
         mapper.mapField(field, mappingContext)
         then:
-        1 * mapper.stateMachine >> stateMachine
+        1 * mapper.getStateMachine(field) >> stateMachine
         1 * stateMachine.process(field, mappingContext, !null)
     }
 }

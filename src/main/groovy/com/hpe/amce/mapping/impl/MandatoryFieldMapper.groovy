@@ -22,6 +22,12 @@ import javax.annotation.Nonnull
  * invalid or causes translation error. However, warning message will still
  * be generated.
  *
+ * If either getter not defaulter are set - no way to obtain value to validate/translate/set.
+ * This is treated as code error.
+ *
+ * If we have a getter then there supposed to be either validator to check input value or
+ * setter to propagate it to output. If there are none then the field should not be mandatory.
+ *
  * Absence means null.
  *
  * OO - Original object type.
@@ -109,7 +115,15 @@ class MandatoryFieldMapper<OO, RO, P> extends AbstractStateMachineFieldMapper<OO
     }
 
     @Override
-    protected State getStateMachine() {
+    protected State getStateMachine(@Nonnull Field<OO, RO, ?, ?, P> field) {
+        if (!field.getter && !field.defaulter) {
+            throw new IllegalStateException('Neither getter not defaulter are set' +
+                    ' - no way to obtain value to validate/translate/set.')
+        }
+        if (field.getter && !field.validator && !field.setter) {
+            throw new IllegalStateException('There is a getter but neither validator, nor setter' +
+                    ' so we neither validate, nor propagate it - this makes no sense for mandatory field.')
+        }
         stateMachine
     }
 

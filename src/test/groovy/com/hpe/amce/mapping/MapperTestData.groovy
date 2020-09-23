@@ -969,7 +969,7 @@ def l956(){cfg(Opt.O, Get.Some, Val.Undef, Def.Undef, Tr.Ex, Set.Ex, Fld.None, L
 def l957(){cfg(Opt.O, Get.Some, Val.Undef, Def.Undef, Tr.Ex, Set.Undef, Fld.CodeErr, Log.None)}
 def l958(){cfg(Opt.O, Get.Some, Val.Undef, Def.Undef, Tr.Undef, Set.Ok, Fld.Orig, Log.None)}
 def l959(){cfg(Opt.O, Get.Some, Val.Undef, Def.Undef, Tr.Undef, Set.Ex, Fld.CodeErr, Log.None)}
-def l960(){cfg(Opt.O, Get.Some, Val.Undef, Def.Undef, Tr.Undef, Set.Undef, Fld.CodeErr, Log.None)}
+def l960(){cfg(Opt.O, Get.Some, Val.Undef, Def.Undef, Tr.Undef, Set.Undef, Fld.None, Log.None)}
 def l961(){cfg(Opt.O, Get.Null, Val.Ok, Def.Some, Tr.Some, Set.Ok, Fld.Def, Log.None)}
 def l962(){cfg(Opt.O, Get.Null, Val.Ok, Def.Some, Tr.Some, Set.Ex, Fld.CodeErr, Log.None)}
 def l963(){cfg(Opt.O, Get.Null, Val.Ok, Def.Some, Tr.Some, Set.Undef, Fld.CodeErr, Log.None)}
@@ -1161,7 +1161,7 @@ def l1148(){cfg(Opt.O, Get.Null, Val.Undef, Def.Undef, Tr.Ex, Set.Ex, Fld.None, 
 def l1149(){cfg(Opt.O, Get.Null, Val.Undef, Def.Undef, Tr.Ex, Set.Undef, Fld.CodeErr, Log.None)}
 def l1150(){cfg(Opt.O, Get.Null, Val.Undef, Def.Undef, Tr.Undef, Set.Ok, Fld.None, Log.None)}
 def l1151(){cfg(Opt.O, Get.Null, Val.Undef, Def.Undef, Tr.Undef, Set.Ex, Fld.None, Log.None)}
-def l1152(){cfg(Opt.O, Get.Null, Val.Undef, Def.Undef, Tr.Undef, Set.Undef, Fld.CodeErr, Log.None)}
+def l1152(){cfg(Opt.O, Get.Null, Val.Undef, Def.Undef, Tr.Undef, Set.Undef, Fld.None, Log.None)}
 def l1153(){cfg(Opt.O, Get.Ex, Val.Ok, Def.Some, Tr.Some, Set.Ok, Fld.Def, Log.Warn)}
 def l1154(){cfg(Opt.O, Get.Ex, Val.Ok, Def.Some, Tr.Some, Set.Ex, Fld.CodeErr, Log.Warn)}
 def l1155(){cfg(Opt.O, Get.Ex, Val.Ok, Def.Some, Tr.Some, Set.Undef, Fld.CodeErr, Log.None)}
@@ -1353,7 +1353,7 @@ def l1340(){cfg(Opt.O, Get.Ex, Val.Undef, Def.Undef, Tr.Ex, Set.Ex, Fld.None, Lo
 def l1341(){cfg(Opt.O, Get.Ex, Val.Undef, Def.Undef, Tr.Ex, Set.Undef, Fld.CodeErr, Log.None)}
 def l1342(){cfg(Opt.O, Get.Ex, Val.Undef, Def.Undef, Tr.Undef, Set.Ok, Fld.None, Log.Warn)}
 def l1343(){cfg(Opt.O, Get.Ex, Val.Undef, Def.Undef, Tr.Undef, Set.Ex, Fld.None, Log.Warn)}
-def l1344(){cfg(Opt.O, Get.Ex, Val.Undef, Def.Undef, Tr.Undef, Set.Undef, Fld.CodeErr, Log.None)}
+def l1344(){cfg(Opt.O, Get.Ex, Val.Undef, Def.Undef, Tr.Undef, Set.Undef, Fld.None, Log.None)}
 def l1345(){cfg(Opt.O, Get.Undef, Val.Ok, Def.Some, Tr.Some, Set.Ok, Fld.CodeErr, Log.None)}
 def l1346(){cfg(Opt.O, Get.Undef, Val.Ok, Def.Some, Tr.Some, Set.Ex, Fld.CodeErr, Log.None)}
 def l1347(){cfg(Opt.O, Get.Undef, Val.Ok, Def.Some, Tr.Some, Set.Undef, Fld.CodeErr, Log.None)}
@@ -1543,8 +1543,8 @@ def l1530(){cfg(Opt.O, Get.Undef, Val.Undef, Def.Undef, Tr.Null, Set.Undef, Fld.
 def l1531(){cfg(Opt.O, Get.Undef, Val.Undef, Def.Undef, Tr.Ex, Set.Ok, Fld.CodeErr, Log.None)}
 def l1532(){cfg(Opt.O, Get.Undef, Val.Undef, Def.Undef, Tr.Ex, Set.Ex, Fld.CodeErr, Log.None)}
 def l1533(){cfg(Opt.O, Get.Undef, Val.Undef, Def.Undef, Tr.Ex, Set.Undef, Fld.CodeErr, Log.None)}
-def l1534(){cfg(Opt.O, Get.Undef, Val.Undef, Def.Undef, Tr.Undef, Set.Ok, Fld.CodeErr, Log.None)}
-def l1535(){cfg(Opt.O, Get.Undef, Val.Undef, Def.Undef, Tr.Undef, Set.Ex, Fld.CodeErr, Log.None)}
+def l1534(){cfg(Opt.O, Get.Undef, Val.Undef, Def.Undef, Tr.Undef, Set.Ok, Fld.None, Log.None)}
+def l1535(){cfg(Opt.O, Get.Undef, Val.Undef, Def.Undef, Tr.Undef, Set.Ex, Fld.None, Log.None)}
 def l1536(){cfg(Opt.O, Get.Undef, Val.Undef, Def.Undef, Tr.Undef, Set.Undef, Fld.CodeErr, Log.None)}
 
 }

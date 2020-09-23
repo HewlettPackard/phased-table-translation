@@ -300,8 +300,30 @@ class MapperTest extends Specification {
                                     Cfg cfg = new Cfg(optional, getter, validator, defaulter, translator, setter)
                                     Fld field
                                     Log log
-                                    if (getter == Get.Undef && defaulter == Def.Undef) {
-                                        // Neither getter, nor defaulter are set.
+                                    if (optional == Opt.O
+                                            && getter != Get.Undef && validator == Val.Undef && setter == Set.Undef) {
+                                        // For an optional field we have a getter but neither validator nor setter.
+                                        // This means we want to explicitly tell that we'll ignore particular
+                                        // input field - we will not read it and it does not matter if its there or not.
+                                        // Defaulter or translator would be a nonsense.
+                                        field = defaulter == Def.Undef && translator == Tr.Undef
+                                                ? Fld.None
+                                                : Fld.CodeErr
+                                    } else if (optional == Opt.O
+                                            && getter == Get.Undef && defaulter == Def.Undef && setter != Set.Undef) {
+                                        // Neither getter, nor defaulter are set for an optional field
+                                        // for which we have a setter.
+                                        // This means we want to explicitly tell that we will ignore this
+                                        // particular output field - we will not provide it.
+                                        // Translator or validator in this mode is nonsense but setter is to be
+                                        // specified to indicate output field that is to be ignored.
+                                        // Since setter will never be called,
+                                        // it does not matter if it will throw or not
+                                        field = validator == Val.Undef && translator == Tr.Undef
+                                                ? Fld.None
+                                                : Fld.CodeErr
+                                    } else if (getter == Get.Undef && defaulter == Def.Undef && optional == Opt.M) {
+                                        // Neither getter, nor defaulter are set for a mandatory field.
                                         // What will I translate?
                                         field = Fld.CodeErr
                                     } else if (setter == Set.Undef && (

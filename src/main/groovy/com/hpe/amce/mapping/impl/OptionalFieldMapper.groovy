@@ -34,19 +34,20 @@ import javax.annotation.Nonnull
 class OptionalFieldMapper<OO, RO, P> extends AbstractStateMachineFieldMapper<OO, RO, P> {
 
     @Nonnull
-    private final State stateMachine
+    private final State normalStateMachine
+
+    @Nonnull
+    private final State ignoreInputFieldStateMachine
+
+    @Nonnull
+    private final State ignoreOutputFieldStateMachine
 
     /**
-     * Creates new instance.
-     * @param messageFormatterFactory Factory for formatter of error messages or null
-     * if {@link SingleLineMesasgeFormatter} should be used.
+     * Create state machine for the case when we want to propagate value from input field to output.
+     * @param messageFormatter Message formatter to be used.
+     * @return State machine to execute.
      */
-    // This is configuration of state machine.
-    @SuppressWarnings('MethodSize')
-    OptionalFieldMapper(Closure<MessageFormatter> messageFormatterFactory = null) {
-        MessageFormatter messageFormatter = messageFormatterFactory ?
-                messageFormatterFactory() :
-                new SingleLineMesasgeFormatter(mandatory: false)
+    private static State createNormalStateMachine(MessageFormatter messageFormatter) {
         Getter getter = new Getter()
         Validator validator = new Validator()
         Translator translator = new Translator()
@@ -105,11 +106,65 @@ class OptionalFieldMapper<OO, RO, P> extends AbstractStateMachineFieldMapper<OO,
                 end,
                 new CodeError('Setter throws exception', messageFormatter),
                 end)
-        stateMachine = getter
+        return getter
+    }
+
+    /**
+     * Create state machine for the case when we just want to highlight that we ignore certain input field.
+     *
+     * We're supposed to have a getter to show that we are aware of the field but nothing else
+     * to show we are ignoring it.
+     *
+     * @return State machine to be executed.
+     */
+    private static State createIgnoreInputFieldStateMachine() {
+        new End()
+    }
+
+    /**
+     * Create state machine for the case when we just want to highlight that we ignore certain output field.
+     *
+     * We're supposed to have a setter to show that we are aware of the field but nothing else
+     * to show we are ignoring it.
+     *
+     * @return State machine to be executed.
+     */
+    private static State createIgnoreOutputFieldStateMachine() {
+        new End()
+    }
+
+    /**
+     * Creates new instance.
+     * @param messageFormatterFactory Factory for formatter of error messages or null
+     * if {@link SingleLineMesasgeFormatter} should be used.
+     */
+    // This is configuration of state machine.
+    @SuppressWarnings('MethodSize')
+    OptionalFieldMapper(Closure<MessageFormatter> messageFormatterFactory = null) {
+        MessageFormatter messageFormatter = messageFormatterFactory ?
+                messageFormatterFactory() :
+                new SingleLineMesasgeFormatter(mandatory: false)
+        normalStateMachine = createNormalStateMachine(messageFormatter)
+        ignoreInputFieldStateMachine = createIgnoreInputFieldStateMachine()
+        ignoreOutputFieldStateMachine = createIgnoreOutputFieldStateMachine()
     }
 
     @Override
-    protected State getStateMachine() {
-        stateMachine
+    protected State getStateMachine(@Nonnull Field<OO, RO, ?, ?, P> field) {
+        if (!field.getter && !field.setter) {
+            throw new IllegalStateException('There are neither getter, nor setter. Can`t do anything with such field.')
+        }
+        if (field.getter && !field.validator && !field.setter) {
+            if (field.defaulter || field.translator) {
+                throw new IllegalStateException('There is getter but no validator or setter' +
+                        ' this means we want to show we ignore certain input field.' +
+                        ' This means defaulter or translator make no sense because their result will be ignored')
+            }
+            return ignoreInputFieldStateMachine
+        }
+        if (!field.getter && !field.defaulter && field.setter) {
+            return ignoreOutputFieldStateMachine
+        }
+        return normalStateMachine
     }
 }

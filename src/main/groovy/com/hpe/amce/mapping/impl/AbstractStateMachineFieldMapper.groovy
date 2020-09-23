@@ -17,10 +17,7 @@ import javax.annotation.Nonnull
  *
  * This base class will check for incorrect configuration combinations:
  * <ul>
- * <li>Neither getter not defaulter are set - no way to obtain value to validate/translate/set.</li>
- * <li>If setter is not set this means we are in pure checking mode.
- *      This is pointless if validator is not set.
- *      Also defaulter and translation are useless in this case and should not be set.</li>
+ * <li>If there is no setter then defaulter and translation are useless and should not be set.</li>
  * <li>If there is no getter then it's pointless to set
  *      validator or translator because they won't be called anyway.</li>
  * </ul>
@@ -37,14 +34,9 @@ abstract class AbstractStateMachineFieldMapper<OO, RO, P> implements FieldMapper
     void mapField(
             @Nonnull Field<OO, RO, ?, ?, P> field,
             @Nonnull MappingContext<OO, RO, P> mappingContext) {
-        if (!field.getter && !field.defaulter) {
-            throw new IllegalStateException('Neither getter not defaulter are set' +
-                    ' - no way to obtain value to validate/translate/set.')
-        }
-        if (!field.setter && (!field.validator || field.defaulter || field.translator)) {
-            throw new IllegalStateException('If setter is not set this means we are in pure checking mode. ' +
-                    'This is pointless if validator is not set. ' +
-                    'Also defaulter and translation are useless in this case and should not be set.')
+        if (!field.setter && (field.defaulter || field.translator)) {
+            throw new IllegalStateException('Since there is no setter, defaulter and translator make no sense' +
+                    ' as their result will be ignored.')
         }
         if (!field.getter && (field.validator || field.translator)) {
             throw new IllegalStateException("If there is no getter then it's pointless to set " +
@@ -56,13 +48,14 @@ abstract class AbstractStateMachineFieldMapper<OO, RO, P> implements FieldMapper
         if (field == null) {
             throw new IllegalStateException('Field descriptor must be set')
         }
-        stateMachine.process(field, mappingContext, new MachineContext())
+        getStateMachine(field).process(field, mappingContext, new MachineContext())
     }
 
     /**
      * Gets state machine for this field mapper.
+     * @param field Field to be translated.
      * @return Starting state of state machine.
      */
-    protected abstract State getStateMachine()
+    protected abstract State getStateMachine(@Nonnull Field<OO, RO, ?, ?, P> field)
 
 }
