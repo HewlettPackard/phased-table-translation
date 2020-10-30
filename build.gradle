@@ -27,7 +27,7 @@ configurations.configureEach { configuration ->
 
 dependencies {
     implementation platform('org.apache.logging.log4j:log4j-bom:2.13.0')
-    implementation 'org.codehaus.groovy:groovy'
+    implementation 'org.codehaus.groovy:groovy::indy'
     implementation "com.google.code.findbugs:jsr305:3.0.2"
     implementation 'org.apache.logging.log4j:log4j-core'
     implementation 'io.dropwizard.metrics:metrics-core:4.1.2'
@@ -48,6 +48,11 @@ quality {
 wrapper {
     distributionType = Wrapper.DistributionType.ALL
 }
+
+tasks.withType(GroovyCompile, { task ->
+    task.options.deprecation = true
+    task.groovyOptions.optimizationOptions['indy'] = true
+} as Action)
 
 task checkNoSnapshotDependencies {
     description "Check there are no SNAPSHOT dependencies if we're building non-SNAPSHOT version."
