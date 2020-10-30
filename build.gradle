@@ -19,7 +19,7 @@ configurations.configureEach { configuration ->
     configuration.resolutionStrategy({ strategy ->
         strategy.eachDependency { DependencyResolveDetails dependency ->
             if (dependency.requested.group == 'org.codehaus.groovy') {
-                dependency.useVersion "3.0.2"
+                dependency.useVersion "3.0.6"
             }
         }
     } as Action)
