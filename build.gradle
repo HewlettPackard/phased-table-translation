@@ -12,7 +12,7 @@ description = "A library that facilitates translation from one data format to an
 group = "com.hpe.amce"
 
 repositories {
-    jcenter()
+    mavenCentral()
 }
 
 configurations.configureEach { configuration ->
