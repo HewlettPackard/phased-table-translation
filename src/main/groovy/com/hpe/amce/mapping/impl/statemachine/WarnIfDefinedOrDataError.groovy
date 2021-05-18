@@ -13,6 +13,8 @@ import groovy.transform.CompileStatic
  * as would be logged.
  */
 @CompileStatic
+// There is abstract method: createMessage
+@SuppressWarnings('AbstractClassWithoutAbstractMethod')
 abstract class WarnIfDefinedOrDataError extends Warn {
 
     /**

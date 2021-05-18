@@ -15,6 +15,8 @@ import javax.annotation.Nullable
  * to configure a state once it is created.
  */
 @CompileStatic
+// There are abstract methods: isDefined, process
+@SuppressWarnings('AbstractClassWithoutAbstractMethod')
 abstract class AbstractState implements State {
 
     private State onException

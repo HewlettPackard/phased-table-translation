@@ -47,6 +47,8 @@ class OptionalFieldMapper<OO, RO, P> extends AbstractStateMachineFieldMapper<OO,
      * @param messageFormatter Message formatter to be used.
      * @return State machine to execute.
      */
+    // This is more of a configuration with lots of newlines rather than a code
+    @SuppressWarnings('MethodSize')
     private static State createNormalStateMachine(MessageFormatter messageFormatter) {
         Getter getter = new Getter()
         Validator validator = new Validator()

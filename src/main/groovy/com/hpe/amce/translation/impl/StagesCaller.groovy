@@ -1,6 +1,7 @@
 package com.hpe.amce.translation.impl
 
 import com.hpe.amce.translation.BatchTranslator
+import groovy.transform.CompileStatic
 
 import javax.annotation.Nonnull
 import javax.annotation.Nullable
@@ -17,6 +18,7 @@ import javax.annotation.Nullable
  * @see StagesCaller#processingStages
  * @see StagesCaller#aroundStage
  */
+@CompileStatic
 class StagesCaller<O, R, C> implements BatchTranslator<O, R, C> {
 
     /**

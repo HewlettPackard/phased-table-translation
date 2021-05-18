@@ -38,13 +38,6 @@ dependencies {
     testImplementation 'cglib:cglib-nodep:3.3.0'
 }
 
-quality {
-    // https://github.com/CodeNarc/CodeNarc/issues/426
-    // But codenarc 1.5 seems to be incompatible with Groovy 3
-    // codenarcVersion = '1.5'
-    codenarc = false
-}
-
 wrapper {
     distributionType = Wrapper.DistributionType.ALL
 }

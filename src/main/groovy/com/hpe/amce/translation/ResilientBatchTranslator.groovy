@@ -313,12 +313,16 @@ class ResilientBatchTranslator<C> {
      * null result list is replaced with empty list.
      */
     private class SafeEventProcessor implements Callable<List<?>> {
+
         @Nullable
         Object event
+
         @Nullable
         Object context
+
         @Nonnull
         String stageName
+
         @Nonnull
         Closure<List<?>> stageCode
 

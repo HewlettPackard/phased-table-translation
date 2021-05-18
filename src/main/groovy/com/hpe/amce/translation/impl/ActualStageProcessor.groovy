@@ -1,5 +1,7 @@
 package com.hpe.amce.translation.impl
 
+import groovy.transform.CompileStatic
+
 import javax.annotation.Nonnull
 import javax.annotation.Nullable
 
@@ -11,6 +13,7 @@ import javax.annotation.Nullable
  *
  * @see ActualStageProcessor#aroundElement
  */
+@CompileStatic
 class ActualStageProcessor<C> implements AroundStage<C> {
 
     /**

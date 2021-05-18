@@ -11,7 +11,7 @@ import javax.annotation.Nullable
  *
  * @see BatchDumper#dumpBatch
  */
-interface BatchDumper<E,C> {
+interface BatchDumper<E, C> {
 
     /**
      * Dumps specified batch of elements to string.
@@ -20,6 +20,6 @@ interface BatchDumper<E,C> {
      * @return String representation of batch and/or context.
      */
     @Nonnull
-    String dumpBatch(@Nullable List<E> batch, @Nullable C context )
+    String dumpBatch(@Nullable List<E> batch, @Nullable C context)
 
 }

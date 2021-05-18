@@ -2,6 +2,7 @@ package com.hpe.amce.mapping.impl
 
 import com.hpe.amce.mapping.Field
 import com.hpe.amce.mapping.MappingContext
+import groovy.transform.CompileStatic
 
 import javax.annotation.Nonnull
 
@@ -11,6 +12,7 @@ import javax.annotation.Nonnull
  * This metric name calculator create a metric for each field allowing
  * to track how much time it takes to map each field.
  */
+@CompileStatic
 class PrefixedFieldIdMetricNameCalculator<OO, RO, P>
         implements MeteringFieldMapperDecorator.MetricNameCalculator<OO, RO, P> {
 
