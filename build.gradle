@@ -15,19 +15,10 @@ repositories {
     mavenCentral()
 }
 
-configurations.configureEach { configuration ->
-    configuration.resolutionStrategy({ strategy ->
-        strategy.eachDependency { DependencyResolveDetails dependency ->
-            if (dependency.requested.group == 'org.codehaus.groovy') {
-                dependency.useVersion "3.0.6"
-            }
-        }
-    } as Action)
-}
-
 dependencies {
     implementation platform('org.apache.logging.log4j:log4j-bom:2.14.1')
-    implementation 'org.codehaus.groovy:groovy::indy'
+    implementation platform('org.codehaus.groovy:groovy:3.0.6')
+    implementation 'org.codehaus.groovy:groovy'
     implementation "com.google.code.findbugs:jsr305:3.0.2"
     implementation 'org.apache.logging.log4j:log4j-core'
     implementation 'io.dropwizard.metrics:metrics-core:4.2.0'
@@ -44,7 +35,6 @@ wrapper {
 
 tasks.withType(GroovyCompile, { task ->
     task.options.deprecation = true
-    task.groovyOptions.optimizationOptions['indy'] = true
 } as Action)
 
 task checkNoSnapshotDependencies {
