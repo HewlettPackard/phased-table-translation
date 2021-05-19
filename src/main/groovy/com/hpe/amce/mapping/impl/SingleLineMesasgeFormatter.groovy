@@ -34,8 +34,8 @@ class SingleLineMesasgeFormatter implements MessageFormatter {
             @Nonnull String message) {
         String optionality = mandatory ? 'mandatory' : 'optional'
         "$message for $optionality field ${field.id}." +
-                " Parameters: ${mappingContext.parameters}." +
-                " On: ~~~>${mappingContext.originalObject}<~~~"
+                " On: ~~~>${mappingContext.originalObject}<~~~" +
+                " Parameters: ${mappingContext.parameters}."
     }
 
 }

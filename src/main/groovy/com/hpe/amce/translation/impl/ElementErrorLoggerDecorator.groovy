@@ -42,8 +42,8 @@ class ElementErrorLoggerDecorator<C> implements AroundElement<C> {
         } catch (Throwable e) {
             log.error("$stageName has failed." +
                     " Reason: ${e.message}." +
-                    " Context: $context" +
-                    " On: $element"
+                    " On: ~~~>$element<~~~" +
+                    " Context: $context"
                     , e)
             throw e
         }
