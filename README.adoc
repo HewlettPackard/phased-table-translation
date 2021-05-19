@@ -69,7 +69,288 @@ ifndef::env-github[]
 :imagesdir: src/docs/diagrams/
 endif::[]
 
-== Long desciption
+== Example
+
+Imagine you get the following messages as an input:
+
+[NOTE]
+JSON here is just an example. Input and output can have any data format and do not have to match.
+
+```json
+{
+  "in_notificationType": "notifyNewAlarm",
+  "in_alarmType": "CommunicationsAlarm",
+  "in_objectClass": "PHYSICAL_TERMINATION_POINT",
+  "in_objectInstance": "IRPNetwork=ABCNetwork,Subnet=TN2,BSS=B5C0100",
+  "in_notificationId": 123,
+  "in_correlatedNotifications": [
+    1,
+    2
+  ],
+  "in_eventTime": "1937-01-01T12:00:27.87+00:20",
+  "in_systemDN": "DC=www.some_example.org, SubNetwork=1, ManagementNode=1, IRPAgent=1",
+  "in_alarmId": "ABC:5654",
+  "in_agentEntity": "ems_south",
+  "in_probableCause": "fire",
+  "in_perceivedSeverity": "Critical",
+  "in_specificProblem": [
+    "example specific problem 1"
+  ],
+  "in_additionalText": "Everything is on fire!",
+  "in_siteLocation": "Lindau",
+  "in_regionLocation": "Bavaria",
+  "in_vendorName": "Some Company",
+  "in_technologyDomain": "Mobile",
+  "in_equipmentModel": "MNM 3000",
+  "in_plannedOutageIndication": false,
+  "in_customStringAttribute": "custom string value",
+  "in_customListAttribute": [
+    "custom value 1",
+    "custom value 2",
+    "custom value 3"
+  ]
+}
+```
+
+Now imagine that based on some rules each input message should result in zero, one or multiple messages each consisting of multiple fields where each field is mapped from one or more input fields (or maybe just a constant). Some fields are just a copy of the value, others are table lookup, values of some fields depend on logical branches, others are parsed and so on. Example, output could look like the following:
+
+```json
+{
+  "out_notificationType": "notifyNewAlarm",
+  "out_alarmType": "CommunicationsAlarm",
+  "out_objectClass": "PHYSICAL_TERMINATION_POINT",
+  "out_objectInstance": "IRPNetwork=ABCNetwork,Subnet=TN2,BSS=B5C0100",
+  "out_notificationId": 123,
+  "out_correlatedNotifications": [
+    1,
+    2
+  ],
+  "out_eventTime": "1937-01-01T12:00:27.87+00:20",
+  "out_systemDN": "DC=www.some_example.org, SubNetwork=1, ManagementNode=1, IRPAgent=1",
+  "out_alarmId": "ABC:5654",
+  "out_agentEntity": "ems_south",
+  "out_probableCause": "fire",
+  "out_perceivedSeverity": "Critical",
+  "out_specificProblem": [
+    "example specific problem 1"
+  ],
+  "out_additionalText": "Everything is on fire!",
+  "out_siteLocation": "Lindau",
+  "out_regionLocation": "Bavaria",
+  "out_vendorName": "Some Company",
+  "out_technologyDomain": "Mobile",
+  "out_equipmentModel": "MNM 3000",
+  "out_plannedOutageIndication": false,
+}
+```
+Imaging that the mapping could be described with the following table:
+
+[cols="1a,1a,1a,1a,3a,1a"]
+|===
+|Input field |Mandatory |Default value |Verification |Translation |Output attribute
+
+|None
+|Mandatory
+|notifyNewAlarm
+|None
+|None
+|out_notificationType
+
+|None
+|Mandatory
+|As specified in configuration file
+|None
+|None
+|out_agentEntity
+
+|in_alarmId
+|Mandatory
+|None
+|Not empty
+|None
+|out_alarmId
+
+|in_alarmType
+|Mandatory
+|None
+|Is one of the values from lookup table
+|Lookup from configuration file. The following table shows default conversion:
+[%header,separator=";",format=csv]
+!===
+Input value; Result value
+CommunicationsAlarm;CommunicationsAlarm
+ProcessingErrorAlarm;ProcessingErrorAlarm
+EnvironmentalAlarm;EnvironmentalAlarm
+QualityOfServiceAlarm;QualityOfServiceAlarm
+EquipmentAlarm;EquipmentAlarm
+!===
+|out_alarmType
+
+|in_objectClass
+|Optional
+|None
+|None
+|None
+|out_objectClass
+
+|in_CLASS1, in_CLASS2, in_objectInstance
+|Mandatory
+|None
+|Not empty
+|
+Value of `in_objectInstance` if it is provided and not empty.
+Otherwise, the value will be the following:
+
+```
+CLASS1=in_CLASS1,CLASS2=in_CLASS2
+```
+
+Where `in_CLASS1` and `in_CLASS2`
+are values of the corresponding fields processed the following way:
+
+. Classes whose value is missing are omitted
+. White space characters are removed from beginning and end
+. Classes whose value is blank are omitted
+. Characters specified in section
+"7.2 Character syntax" of link:https://www.3gpp.org/DynaReport/32300.htm[3GPP TS 32.300 V16.0.0]
+are escaped as specified in section "7.1.1.3 Converting AttributeTypeAndValue"
+of the same technical specification
+|out_objectInstance
+
+|in_notificationId
+|Optional
+|None
+|None
+|None
+|out_notificationId
+
+|in_correlatedNotifications
+|Optional
+|None
+|Not empty
+|None
+|out_correlatedNotifications
+
+|in_eventTime
+|Mandatory
+|Current time on the machine where adapter is running
+|Not empty
+|Parsed from ISO-8601 extended offset date-time format
+text string such as `2007-12-03T10:15:30.123+01:00`,
+converted either to UTC or local time based on settings specified in configuration
+and then formatted as ISO-8601 extended format
+text string such as `2007-12-03T10:15:30.123+01:00`
+|out_eventTime
+
+|in_systemDN
+|Optional
+|None
+|None
+|None
+|out_systemDN
+
+|in_probableCause
+|Mandatory
+|indeterminate
+|Is one of the values from lookup table
+|Lookup from configuration file. The following table shows default conversion:
+[%header,separator=";",format=csv]
+!===
+Input value; Result value
+a-bis to bts interface failure;a-bis to bts interface failure
+a-bis to trx interface failure;a-bis to trx interface failure
+adapter error;adapter error
+air compressor failure;air compressor failure
+fire;fire
+fire detector failure;fire detector failure
+!===
+|out_probableCause
+
+|in_perceivedSeverity
+|Mandatory
+|Indeterminate
+|Is one of the values from lookup table
+|Lookup from configuration file. The following table shows default conversion:
+[%header,separator=";",format=csv]
+!===
+Input value; Result value
+Cleared;Cleared
+Indeterminate;Indeterminate
+Critical;Critical
+Major;Major
+Minor;Minor
+Warning;Warning
+!===
+|out_perceivedSeverity
+
+|in_specificProblem
+|Optional
+|None
+|None
+|None
+|out_specificProblem
+
+|in_additionalText
+|Optional
+|None
+|None
+|None
+|out_additionalText
+
+|in_siteLocation
+|Optional
+|None
+|None
+|None
+|out_siteLocation
+
+|in_regionLocation
+|Optional
+|None
+|None
+|None
+|out_regionLocation
+
+|in_vendorName
+|Optional
+|None
+|None
+|None
+|out_vendorName
+
+|in_technologyDomain
+|Optional
+|None
+|None
+|None
+|out_technologyDomain
+
+|in_technologyDomain
+|Optional
+|None
+|None
+|None
+|out_technologyDomain
+
+|in_plannedOutageIndication
+|Optional
+|None
+|None
+|None
+|out_plannedOutageIndication
+
+|===
+
+This table could be a contract, a specification, a part of user documentation. It can be represented as
+a table in the code with exactly the same structure:
+
+* Each row in the specification is one row in the table in the code
+* Each column in the specification table is a call to the corresponding `withXXX` method
+* Cells with `None` are just omitted calls
+
+Here's how it looks like: link:src/test/groovy/com/hpe/amce/mapping/typical/EventsMapping.groovy[]
+
+== Long description
 
 === Background
 
