@@ -1,6 +1,7 @@
 package com.hpe.amce.translation.impl
 
 import com.codahale.metrics.MetricRegistry
+import com.codahale.metrics.Timer
 import groovy.transform.CompileStatic
 
 import javax.annotation.Nonnull
@@ -18,6 +19,8 @@ import java.util.concurrent.Callable
  *
  * It is possible to override default metric names via
  * {@link ElementMeteringDecorator#timerName}.
+ *
+ * Parameters of metric can be customized via {@link ElementMeteringDecorator#metricTimerFactory}.
  *
  * C - type of translation context.
  */
@@ -53,6 +56,19 @@ class ElementMeteringDecorator<C> implements AroundElement<C> {
     Closure<String> timerName = { String stageName -> "$metricsBaseName${stageName}.one".toString() }
 
     /**
+     * Factory that is to be used to create timer metrics.
+     *
+     * By default, uses default parameters of {@link com.codahale.metrics.Timer#Timer()}.
+     */
+    @Nonnull
+    MetricRegistry.MetricSupplier<Timer> metricTimerFactory = new MetricRegistry.MetricSupplier<Timer>() {
+        @Override
+        Timer newMetric() {
+            new Timer()
+        }
+    }
+
+    /**
      * Creates new instance.
      * @param next Translator to decorate.
      * @param metricRegistry Registry where to report metrics.
@@ -68,7 +84,7 @@ class ElementMeteringDecorator<C> implements AroundElement<C> {
     @Override
     List<?> translateElement(@Nonnull String stageName, @Nonnull Closure<List<?>> stageCode, @Nullable Object element,
                              @Nullable C context) {
-        metricRegistry.timer(timerName(stageName)).time({
+        metricRegistry.timer(timerName(stageName), metricTimerFactory).time({
             next.translateElement(stageName, stageCode, element, context)
         } as Callable)
     }

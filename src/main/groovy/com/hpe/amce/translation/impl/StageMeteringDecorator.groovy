@@ -1,6 +1,9 @@
 package com.hpe.amce.translation.impl
 
+import com.codahale.metrics.ExponentiallyDecayingReservoir
+import com.codahale.metrics.Histogram
 import com.codahale.metrics.MetricRegistry
+import com.codahale.metrics.Timer
 import groovy.transform.CompileStatic
 import groovy.util.logging.Log4j2
 
@@ -25,6 +28,10 @@ import java.util.concurrent.Callable
  * It is possible to override default metric names via
  * {@link StageMeteringDecorator#deltaBatchSizeMetricName},
  * {@link StageMeteringDecorator#stageTimerMetricName}.
+ *
+ * Parameters of metrics can be customized via
+ * {@link StageMeteringDecorator#metricTimerFactory}
+ * and {@link StageMeteringDecorator#metricHistogramFactory}.
  *
  * C - type of translation context.
  */
@@ -75,6 +82,32 @@ class StageMeteringDecorator<C> implements AroundStage<C> {
             { String stageName -> "$metricsBaseName${stageName}.batch".toString().toString() }
 
     /**
+     * Factory that is to be used to create histogram metrics.
+     *
+     * By default, uses {@link com.codahale.metrics.ExponentiallyDecayingReservoir}.
+     */
+    @Nonnull
+    MetricRegistry.MetricSupplier<Histogram> metricHistogramFactory = new MetricRegistry.MetricSupplier<Histogram>() {
+        @Override
+        Histogram newMetric() {
+            new Histogram(new ExponentiallyDecayingReservoir())
+        }
+    }
+
+    /**
+     * Factory that is to be used to create timer metrics.
+     *
+     * By default, uses default parameters of {@link com.codahale.metrics.Timer#Timer()}.
+     */
+    @Nonnull
+    MetricRegistry.MetricSupplier<Timer> metricTimerFactory = new MetricRegistry.MetricSupplier<Timer>() {
+        @Override
+        Timer newMetric() {
+            new Timer()
+        }
+    }
+
+    /**
      * Creates new instance.
      * @param next Translator to decorate.
      * @param metricRegistry Registry where to report metrics.
@@ -90,10 +123,10 @@ class StageMeteringDecorator<C> implements AroundStage<C> {
     @Override
     List<?> applyStage(@Nonnull String stageName, @Nonnull Closure<List<?>> stageCode,
                        @Nonnull List<?> elements, @Nullable C context) {
-        List<?> result = metricRegistry.timer(stageTimerMetricName(stageName)).time({
+        List<?> result = metricRegistry.timer(stageTimerMetricName(stageName), metricTimerFactory).time({
             next.applyStage(stageName, stageCode, elements, context)
         } as Callable<List<?>>)
-        metricRegistry.histogram(deltaBatchSizeMetricName(stageName)).update(
+        metricRegistry.histogram(deltaBatchSizeMetricName(stageName), metricHistogramFactory).update(
                 (result?.size() ?: 0) - (elements?.size() ?: 0))
         result
     }

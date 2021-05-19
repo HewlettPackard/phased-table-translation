@@ -1,6 +1,7 @@
 package com.hpe.amce.mapping.impl
 
 import com.codahale.metrics.MetricRegistry
+import com.codahale.metrics.Timer
 import com.hpe.amce.mapping.Field
 import com.hpe.amce.mapping.FieldMapper
 import com.hpe.amce.mapping.MappingContext
@@ -10,6 +11,8 @@ import javax.annotation.Nonnull
 
 /**
  * Decorates another {@link FieldMapper} to record its timing.
+ *
+ * Parameters of metric can be customized via {@link MeteringFieldMapperDecorator#metricTimerFactory}.
  *
  * OO - Original object type.
  * RO - Resulting object type.
@@ -47,6 +50,19 @@ class MeteringFieldMapperDecorator<OO, RO, P> implements FieldMapper<OO, RO, P> 
     private final MetricNameCalculator metricNameCalculator
 
     /**
+     * Factory that is to be used to create timer metrics.
+     *
+     * By default, uses default parameters of {@link com.codahale.metrics.Timer#Timer()}.
+     */
+    @Nonnull
+    MetricRegistry.MetricSupplier<Timer> metricTimerFactory = new MetricRegistry.MetricSupplier<Timer>() {
+        @Override
+        Timer newMetric() {
+            new Timer()
+        }
+    }
+
+    /**
      * Creates instance.
      * @param delegate Mapper to be metered.
      * @param metricRegistry Registry where to report metrics to.
@@ -64,7 +80,7 @@ class MeteringFieldMapperDecorator<OO, RO, P> implements FieldMapper<OO, RO, P> 
     @Override
     void mapField(@Nonnull Field<OO, RO, ?, ?, P> field, @Nonnull MappingContext<OO, RO, P> mappingContext) {
         String metricName = metricNameCalculator.calculateMetricName(field, mappingContext)
-        metricRegistry.timer(metricName).time(new Runnable() {
+        metricRegistry.timer(metricName, metricTimerFactory).time(new Runnable() {
             @Override
             void run() {
                 delegate.mapField(field, mappingContext)

@@ -1,6 +1,6 @@
 package com.hpe.amce.translation.impl
 
-import com.codahale.metrics.MetricRegistry
+import com.codahale.metrics.*
 import com.hpe.amce.translation.BatchTranslator
 import spock.lang.Specification
 
@@ -41,6 +41,34 @@ class BatchMeteringDecoratorTest extends Specification {
         }
         then: "publishes 'Total number of resulting elements across all batches - meter' using base name"
         metricRegistry.meter(baseName + '.out.events').count == original*.size().sum() + original.size()
+    }
+
+    def "can customize metrics"() {
+        given:
+        String baseName = 'prefix'
+        BatchTranslator<String, String, List<Boolean>> decorated = Mock()
+        MetricRegistry metricRegistry = new MetricRegistry()
+        List<Boolean> context = [true]
+        List<List<String>> original = [['element']]
+        MetricRegistry.MetricSupplier<Timer> timerFactory = Mock()
+        MetricRegistry.MetricSupplier<Meter> meterFactory = Mock()
+        MetricRegistry.MetricSupplier<Histogram> histogramFactory = Mock()
+        and:
+        BatchMeteringDecorator<String, String, List<Boolean>> instance = new BatchMeteringDecorator<>(
+                decorated, metricRegistry, baseName)
+        instance.metricTimerFactory = timerFactory
+        instance.metricMeterFactory = meterFactory
+        instance.metricHistogramFactory = histogramFactory
+        when:
+        List<List<String>> result = original.collect { instance.translateBatch(it, context) }
+        then: "can translate and uses custom metric factories"
+        1 * timerFactory.newMetric() >> new Timer(
+                LockFreeExponentiallyDecayingReservoir.builder().alpha(0.333333D).build())
+        2 * histogramFactory.newMetric() >> new Histogram(
+                LockFreeExponentiallyDecayingReservoir.builder().alpha(0.444444D).build())
+        3 * meterFactory.newMetric() >> new Meter(new SlidingTimeWindowMovingAverages())
+        decorated.translateBatch(_, _) >> { List<String> mockInput, List<Boolean> mockContext -> mockInput }
+        result == original
     }
 
     def "is null tolerant"() {

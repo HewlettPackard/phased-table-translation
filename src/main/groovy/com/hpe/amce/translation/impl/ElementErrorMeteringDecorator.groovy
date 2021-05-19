@@ -1,5 +1,6 @@
 package com.hpe.amce.translation.impl
 
+import com.codahale.metrics.Meter
 import com.codahale.metrics.MetricRegistry
 import groovy.transform.CompileStatic
 
@@ -14,6 +15,8 @@ import javax.annotation.Nullable
  *
  * The name of meter to be incremented is determined by
  * {@link ElementErrorMeteringDecorator#getMeterName}.
+ *
+ * Parameters of metric can be customized via {@link ElementErrorMeteringDecorator#metricMeterFactory}.
  *
  * C - type of translation context.
  */
@@ -50,6 +53,19 @@ class ElementErrorMeteringDecorator<C> implements AroundElement<C> {
     Closure<String> meterName = { "${metricsBaseName}${it}.error".toString() }
 
     /**
+     * Factory that is to be used to create meter metrics.
+     *
+     * By default, uses default parameters of {@link com.codahale.metrics.Meter#Meter()}.
+     */
+    @Nonnull
+    MetricRegistry.MetricSupplier<Meter> metricMeterFactory = new MetricRegistry.MetricSupplier<Meter>() {
+        @Override
+        Meter newMetric() {
+            new Meter()
+        }
+    }
+
+    /**
      * Creates an instance.
      * @param next Translator to be decorated.
      * @param metricRegistry Metric registry where metric should be reported to.
@@ -72,7 +88,7 @@ class ElementErrorMeteringDecorator<C> implements AroundElement<C> {
         try {
             next.translateElement(stageName, stageCode, element, context)
         } catch (Throwable e) {
-            metricRegistry.meter(meterName(stageName)).mark()
+            metricRegistry.meter(meterName(stageName), metricMeterFactory).mark()
             throw e
         }
     }

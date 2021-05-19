@@ -1,6 +1,8 @@
 package com.hpe.amce.mapping.impl
 
+import com.codahale.metrics.LockFreeExponentiallyDecayingReservoir
 import com.codahale.metrics.MetricRegistry
+import com.codahale.metrics.Timer
 import com.hpe.amce.mapping.Field
 import com.hpe.amce.mapping.FieldMapper
 import com.hpe.amce.mapping.MappingContext
@@ -34,6 +36,18 @@ class MeteringFieldMapperDecoratorTest extends Specification {
         1 * metricNameCalculator.calculateMetricName(fieldDescriptor, mappingContext) >> "foo"
         1 * delegate.mapField(fieldDescriptor, mappingContext)
         metricRegistry.timer("foo").count == 1
+    }
+
+    def "can customize reservoir"() {
+        given:
+        MetricRegistry.MetricSupplier<Timer> timerFactory = Mock()
+        instance.metricTimerFactory = timerFactory
+        when:
+        instance.mapField(fieldDescriptor, mappingContext)
+        then:
+        metricNameCalculator.calculateMetricName(fieldDescriptor, mappingContext) >> "foo"
+        delegate.mapField(fieldDescriptor, mappingContext)
+        1 * timerFactory.newMetric() >> new Timer(LockFreeExponentiallyDecayingReservoir.builder().build())
     }
 
     def "metric name is per field"() {

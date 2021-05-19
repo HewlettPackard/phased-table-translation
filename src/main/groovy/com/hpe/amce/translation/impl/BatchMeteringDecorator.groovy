@@ -1,6 +1,6 @@
 package com.hpe.amce.translation.impl
 
-import com.codahale.metrics.MetricRegistry
+import com.codahale.metrics.*
 import com.hpe.amce.translation.BatchTranslator
 import groovy.transform.CompileStatic
 
@@ -32,6 +32,11 @@ import java.util.concurrent.Callable
  * {@link BatchMeteringDecorator#translationTimeMetricName},
  * {@link BatchMeteringDecorator#outgoingBatchSizeMetricName},
  * {@link BatchMeteringDecorator#outgoingElementsCountMetricName}.
+ *
+ * Parameters of metrics (for example, reservoir type) can be customized via
+ * {@link BatchMeteringDecorator#metricHistogramFactory},
+ * {@link BatchMeteringDecorator#metricMeterFactory},
+ * {@link BatchMeteringDecorator#metricTimerFactory}.
  *
  * O - type of elements in original batch.
  * R - type of elements in resulting batch.
@@ -119,6 +124,45 @@ class BatchMeteringDecorator<O, R, C> implements BatchTranslator<O, R, C> {
     Closure<String> outgoingElementsCountMetricName = { metricsBaseName + '.out.events' }
 
     /**
+     * Factory that is to be used to create meter metrics.
+     *
+     * By default, uses default parameters of {@link Meter#Meter()}.
+     */
+    @Nonnull
+    MetricRegistry.MetricSupplier<Meter> metricMeterFactory = new MetricRegistry.MetricSupplier<Meter>() {
+        @Override
+        Meter newMetric() {
+            new Meter()
+        }
+    }
+
+    /**
+     * Factory that is to be used to create histogram metrics.
+     *
+     * By default, uses {@link ExponentiallyDecayingReservoir}.
+     */
+    @Nonnull
+    MetricRegistry.MetricSupplier<Histogram> metricHistogramFactory = new MetricRegistry.MetricSupplier<Histogram>() {
+        @Override
+        Histogram newMetric() {
+            new Histogram(new ExponentiallyDecayingReservoir())
+        }
+    }
+
+    /**
+     * Factory that is to be used to create timer metrics.
+     *
+     * By default, uses default parameters of {@link Timer#Timer()}.
+     */
+    @Nonnull
+    MetricRegistry.MetricSupplier<Timer> metricTimerFactory = new MetricRegistry.MetricSupplier<Timer>() {
+        @Override
+        Timer newMetric() {
+            new Timer()
+        }
+    }
+
+    /**
      * Creates new instance.
      * @param next Translator to be decorated.
      * @param metricRegistry Registry where to publish metrics.
@@ -135,14 +179,14 @@ class BatchMeteringDecorator<O, R, C> implements BatchTranslator<O, R, C> {
     @Override
     List<R> translateBatch(@Nullable List<O> elements, @Nullable C context) {
         int incomingBatchSize = elements ? elements.size() : 0
-        metricRegistry.meter(incomingBatchCountMetricName()).mark()
-        metricRegistry.histogram(incomingBatchSizeMetricName()).update(incomingBatchSize)
-        metricRegistry.meter(incomingElementsCountMetricName()).mark(incomingBatchSize)
-        List<R> result = metricRegistry.timer(translationTimeMetricName()).time(
+        metricRegistry.meter(incomingBatchCountMetricName(), metricMeterFactory).mark()
+        metricRegistry.histogram(incomingBatchSizeMetricName(), metricHistogramFactory).update(incomingBatchSize)
+        metricRegistry.meter(incomingElementsCountMetricName(), metricMeterFactory).mark(incomingBatchSize)
+        List<R> result = metricRegistry.timer(translationTimeMetricName(), metricTimerFactory).time(
                 { next.translateBatch(elements, context) } as Callable<List<R>>)
         int outgoingBatchSize = result ? result.size() : 0
-        metricRegistry.histogram(outgoingBatchSizeMetricName()).update(outgoingBatchSize)
-        metricRegistry.meter(outgoingElementsCountMetricName()).mark(outgoingBatchSize)
+        metricRegistry.histogram(outgoingBatchSizeMetricName(), metricHistogramFactory).update(outgoingBatchSize)
+        metricRegistry.meter(outgoingElementsCountMetricName(), metricMeterFactory).mark(outgoingBatchSize)
         result
     }
 }
