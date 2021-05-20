@@ -11,9 +11,9 @@ class EventsMappingTest extends Specification {
 
     Map<String, ?> rawEvent
 
-    OtherClasses.Exchange exchange = Mock()
+    Exchange exchange = Mock()
 
-    OtherClasses.ExchangeFormatter exchangeFormatter = Mock()
+    ExchangeFormatter exchangeFormatter = Mock()
 
     EventsMapping.BatchContext batchContext = new EventsMapping.BatchContext(
             exchangeFormatter,
@@ -49,8 +49,8 @@ class EventsMappingTest extends Specification {
                 Warning      : 'Warning',
         ]
         mapping.mapper = new SimpleObjectMapper<>()
-        mapping.timeSerializer = Mock(OtherClasses.TimeSerializer)
-        mapping.distinguishedNameSerializer = Mock(OtherClasses.DistinguishedNameSerializer)
+        mapping.timeSerializer = Mock(TimeSerializer)
+        mapping.distinguishedNameSerializer = Mock(DistinguishedNameSerializer)
     }
 
     def 'notifyNewAlarm'() {

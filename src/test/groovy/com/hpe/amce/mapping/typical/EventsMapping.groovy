@@ -160,13 +160,13 @@ class EventsMapping {
      * Serializes distinguished name that will be sent to the bus.
      */
     @Nonnull
-    OtherClasses.DistinguishedNameSerializer distinguishedNameSerializer
+    DistinguishedNameSerializer distinguishedNameSerializer
 
     /**
      * Converter for dates.
      */
     @Nonnull
-    OtherClasses.TimeSerializer timeSerializer
+    TimeSerializer timeSerializer
 
     /**
      * Mapper to be used to map events.
@@ -230,17 +230,17 @@ class EventsMapping {
      */
     static class BatchContext {
 
-        final OtherClasses.Exchange exchange
+        final Exchange exchange
 
-        final OtherClasses.ExchangeFormatter exchangeFormatter
+        final ExchangeFormatter exchangeFormatter
 
         /**
          * Creates new instance.
          * @param exchangeFormatter Formatter used to dump exchange that is being processed.
          * @param exchange Exchange that is being processed.
          */
-        BatchContext(@Nonnull OtherClasses.ExchangeFormatter exchangeFormatter,
-                     @Nonnull OtherClasses.Exchange exchange) {
+        BatchContext(@Nonnull ExchangeFormatter exchangeFormatter,
+                     @Nonnull Exchange exchange) {
             this.exchange = exchange
             this.exchangeFormatter = exchangeFormatter
         }
